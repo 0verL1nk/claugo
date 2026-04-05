@@ -1,7 +1,7 @@
-# Claude Code — Spec Index
+# Holy Code — Spec Index
 
 > Quick-reference index across all spec documents.
-> Total spec coverage: ~990 KB across 15 markdown files.
+> Total spec coverage: ~953 KB across 15 markdown files.
 
 ---
 
@@ -9,6 +9,7 @@
 
 | # | File | Size | What's Inside |
 |---|------|------|---------------|
+| — | [PROCESS.md](PROCESS.md) | — | Rewrite workflow: analysis docs, OpenSpec changes, validation, archive and spec sync |
 | — | [00_overview.md](00_overview.md) | 16 KB | Master architecture, repo structure, data flow, permission model, settings layers |
 | 01 | [01_core_entry_query.md](01_core_entry_query.md) | 73 KB | `main.tsx`, `query.ts`, `QueryEngine.ts`, entry points, history, cost tracking, token budget |
 | 02 | [02_commands.md](02_commands.md) | 71 KB | All 100+ slash commands with args, options, and implementation |
@@ -22,7 +23,7 @@
 | 10 | [10_utils.md](10_utils.md) | 60 KB | ~564 utility files organized by category |
 | 11 | [11_special_systems.md](11_special_systems.md) | 64 KB | Buddy/Tamagotchi, memdir, keybindings, skills, voice, plugins, migrations |
 | 12 | [12_constants_types.md](12_constants_types.md) | 83 KB | Every constant, type, OAuth config, system prompts, tool limits, beta headers |
-| 13 | [13_rust_codebase.md](13_rust_codebase.md) | 63 KB | Complete Rust rewrite: all 9 crates, 33 tools, query loop, TUI, bridge |
+| 13 | [13_go_codebase.md](13_go_codebase.md) | 16 KB | Complete Go rewrite: command entrypoint, internal packages, tools, query loop, TUI, bridge |
 
 ---
 
@@ -85,11 +86,11 @@
 | Cyber risk instruction | 12 | §cyberRisk |
 | Tool name constants | 12 | §tools |
 | All TypeScript types | 12 | §types |
-| Rust rewrite overview | 13 | §1 |
-| Rust tool implementations | 13 | §cc-tools |
-| Rust query loop | 13 | §cc-query |
-| Rust TUI | 13 | §cc-tui |
-| Rust bridge | 13 | §cc-bridge |
+| Go rewrite overview | 13 | §Overview |
+| Go tool implementations | 13 | §Package: `tools` |
+| Go query loop | 13 | §Package: `query` |
+| Go TUI | 13 | §Package: `tui` |
+| Go bridge | 13 | §Package: `bridge` |
 
 ---
 
@@ -107,16 +108,16 @@
 | Number of utility files | ~564 |
 | Ink terminal framework files | 96 |
 | Bridge protocol files | 31 |
-| Rust crates | 9 |
-| Rust source files | 47 |
-| Spec documentation size | ~990 KB |
+| Go packages | 9 |
+| Go source files | 47 |
+| Spec documentation size | ~953 KB |
 
 ---
 
 ## Architecture in One Paragraph
 
-Claude Code is a terminal AI coding assistant built as a React application running in a custom terminal UI framework (Ink, a React reconciler targeting terminal output with Yoga flexbox layout). The main loop (`query.ts` + `QueryEngine.ts`) streams responses from the Claude API, executes tools with user permission, and manages a 200K-token context window with automatic compaction. It has 100+ slash commands, 40+ tools (file I/O, shell, web, agents, MCP), a multi-agent system for parallel task execution, a memory system for long-term context, voice input, IDE integration via a bridge protocol (WebSocket/SSE), and a plugin/skills marketplace. The codebase is being rewritten in Rust (`claude-code-rust/`) as a complete standalone reimplementation.
+Holy Code is a terminal AI coding assistant built as a React application running in a custom terminal UI framework (Ink, a React reconciler targeting terminal output with Yoga flexbox layout). The main loop (`query.ts` + `QueryEngine.ts`) streams responses from the Claude API, executes tools with user permission, and manages a 200K-token context window with automatic compaction. It has 100+ slash commands, 40+ tools (file I/O, shell, web, agents, MCP), a multi-agent system for parallel task execution, a memory system for long-term context, voice input, IDE integration via a bridge protocol (WebSocket/SSE), and a plugin/skills marketplace. The specs in this repository are used to drive a complete Go reimplementation against `ref/cloud-code/claude-code-source/`.
 
 ---
 
-*Generated 2026-03-31 from Claude Code source analysis.*
+*Generated 2026-03-31 from Holy Code source analysis.*

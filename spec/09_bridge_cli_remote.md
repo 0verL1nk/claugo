@@ -1,4 +1,4 @@
-# Claude Code — Bridge Protocol, CLI Framework & Remote Systems
+# Holy Code — Bridge Protocol, CLI Framework & Remote Systems
 
 ## Table of Contents
 
@@ -33,7 +33,7 @@
 
 ## 1. Bridge System Overview
 
-The "Bridge" (Remote Control) system allows a local Claude Code CLI session to be driven from the claude.ai web application. It creates a bidirectional communication channel between the running CLI process and the cloud backend (CCR — Cloud Code Runner).
+The "Bridge" (Remote Control) system allows a local Holy Code CLI session to be driven from the holy.ai web application. It creates a bidirectional communication channel between the running CLI process and the cloud backend (CCR — Cloud Code Runner).
 
 ### Architecture: Two Bridge Variants
 
@@ -42,7 +42,7 @@ The "Bridge" (Remote Control) system allows a local Claude Code CLI session to b
 - Bridge registers as an "environment", polls for "work" (session dispatches).
 - Session transport: WebSocket (v1) or SSE+CCRClient (CCR v2) via `HybridTransport` or `SSETransport`.
 - `initBridgeCore()` in `replBridge.ts` handles the REPL side.
-- `runBridgeLoop()` in `bridgeMain.ts` handles the standalone `claude remote-control` side.
+- `runBridgeLoop()` in `bridgeMain.ts` handles the standalone `holy remote-control` side.
 
 **V2 — Environment-Less Bridge (env-less)**
 - No Environments API layer whatsoever.
@@ -54,10 +54,10 @@ The "Bridge" (Remote Control) system allows a local Claude Code CLI session to b
 
 **REPL Bridge (always-on / `/remote-control`)**
 - Initialized by `initReplBridge()`, called from `useReplBridge` hook or `print.ts`.
-- Runs inside the existing REPL process; messages from claude.ai are injected as user input.
+- Runs inside the existing REPL process; messages from holy.ai are injected as user input.
 - Lives in `bridge/replBridge.ts`, `bridge/initReplBridge.ts`, `bridge/remoteBridgeCore.ts`.
 
-**Standalone Bridge (`claude remote-control`)**
+**Standalone Bridge (`holy remote-control`)**
 - Spawns child claude processes per session.
 - Main loop in `bridge/bridgeMain.ts` → `runBridgeLoop()`.
 - Supports multi-session spawn modes: `single-session`, `worktree`, `same-dir`.
@@ -72,7 +72,7 @@ The "Bridge" (Remote Control) system allows a local Claude Code CLI session to b
 
 ```typescript
 DEFAULT_SESSION_TIMEOUT_MS = 24 * 60 * 60 * 1000   // 24 hours
-BRIDGE_LOGIN_INSTRUCTION: string  // "Remote Control is only available with claude.ai subscriptions..."
+BRIDGE_LOGIN_INSTRUCTION: string  // "Remote Control is only available with holy.ai subscriptions..."
 BRIDGE_LOGIN_ERROR: string        // Full error printed when not authenticated
 REMOTE_CONTROL_DISCONNECTED_MSG = 'Remote Control disconnected.'
 ```
@@ -369,7 +369,7 @@ Returns `process.env.CLAUDE_BRIDGE_BASE_URL` if `process.env.USER_TYPE === 'ant'
 
 #### `getBridgeAccessToken(): string | undefined`
 
-Dev override first, then `getClaudeAIOAuthTokens()?.accessToken`.
+Dev override first, then `getHolyAIOAuthTokens()?.accessToken`.
 
 #### `getBridgeBaseUrl(): string`
 
@@ -387,7 +387,7 @@ Dev override first, then `getOauthConfig().BASE_API_URL`.
 
 Synchronous. Requires:
 1. Build flag `feature('BRIDGE_MODE')` must be true
-2. `isClaudeAISubscriber()` — excludes Bedrock/Vertex/API key users
+2. `isHolyAISubscriber()` — excludes Bedrock/Vertex/API key users
 3. GrowthBook flag `tengu_ccr_bridge` (cached, may be stale)
 
 #### `isBridgeEnabledBlocking(): Promise<boolean>`
@@ -397,7 +397,7 @@ Like `isBridgeEnabled()` but awaits GrowthBook server fetch if disk cache says f
 #### `getBridgeDisabledReason(): Promise<string | null>`
 
 Returns a user-facing reason string if bridge is unavailable, or `null` if enabled. Checks:
-1. Not a claude.ai subscriber
+1. Not a holy.ai subscriber
 2. Missing `user:profile` scope (setup-token / env-var OAuth tokens)
 3. Missing `organizationUuid` in OAuth account info
 4. `tengu_ccr_bridge` gate off
@@ -420,7 +420,7 @@ Returns `true` when `feature('CCR_AUTO_CONNECT')` and `tengu_cobalt_harbor` gate
 
 #### `isCcrMirrorEnabled(): boolean`
 
-Returns `true` when `feature('CCR_MIRROR')` and either `CLAUDE_CODE_CCR_MIRROR` env var is truthy or `tengu_ccr_mirror` gate is enabled.
+Returns `true` when `feature('CCR_MIRROR')` and either `HOLY_CODE_CCR_MIRROR` env var is truthy or `tengu_ccr_mirror` gate is enabled.
 
 ---
 
@@ -428,7 +428,7 @@ Returns `true` when `feature('CCR_MIRROR')` and either `CLAUDE_CODE_CCR_MIRROR` 
 
 **File:** `bridge/bridgeMain.ts`
 
-This is the main loop for `claude remote-control` (standalone mode).
+This is the main loop for `holy remote-control` (standalone mode).
 
 ### BackoffConfig
 
@@ -843,8 +843,8 @@ getTransportForUrl(url, headers, sessionId, refreshHeaders): Transport
 ```
 
 Priority:
-1. `SSETransport` — when `CLAUDE_CODE_USE_CCR_V2` env is truthy
-2. `HybridTransport` — when URL is `ws(s)://` AND `CLAUDE_CODE_POST_FOR_SESSION_INGRESS_V2` env is truthy
+1. `SSETransport` — when `HOLY_CODE_USE_CCR_V2` env is truthy
+2. `HybridTransport` — when URL is `ws(s)://` AND `HOLY_CODE_POST_FOR_SESSION_INGRESS_V2` env is truthy
 3. `WebSocketTransport` — default for `ws(s)://`
 4. Throws for unsupported protocols
 
@@ -1088,7 +1088,7 @@ Builds V2 HTTP(S) session URL: `{apiBaseUrl}/v1/code/sessions/{sessionId}`
 
 ### Purpose
 
-Crash-recovery pointer written after session creation, refreshed periodically, cleared on clean shutdown. On next startup, `claude remote-control` detects stale pointers and offers to resume.
+Crash-recovery pointer written after session creation, refreshed periodically, cleared on clean shutdown. On next startup, `holy remote-control` detects stale pointers and offers to resume.
 
 ### Constants
 
@@ -1183,7 +1183,7 @@ Resolves `file_uuid` attachments from inbound bridge user messages.
 1. Web composer uploads via `/api/{org}/upload` (cookie-auth).
 2. Bridge receives `file_attachments: [{ file_uuid, file_name }]` on the user message.
 3. `resolveInboundAttachments()` fetches each file via `GET /api/oauth/files/{uuid}/content`.
-4. Downloads to `~/.claude/uploads/{sessionId}/{uuid-prefix}-{sanitizedName}`.
+4. Downloads to `~/.holy/uploads/{sessionId}/{uuid-prefix}-{sanitizedName}`.
 5. Returns `@"path"` prefix string to prepend to message content.
 
 **`DOWNLOAD_TIMEOUT_MS = 30_000`**
@@ -1486,7 +1486,7 @@ enrollTrustedDevice(): Promise<void>
 
 **Token precedence:** `CLAUDE_TRUSTED_DEVICE_TOKEN` env var > keychain.
 
-**Enrollment:** `POST /api/auth/trusted_devices` with display name `"Claude Code on {hostname()} · {platform}"`. Must be called within 10 minutes of login. Best-effort — never throws. On success, persists to keychain and clears memo cache.
+**Enrollment:** `POST /api/auth/trusted_devices` with display name `"Holy Code on {hostname()} · {platform}"`. Must be called within 10 minutes of login. Best-effort — never throws. On success, persists to keychain and clears memo cache.
 
 ### codeSessionApi.ts
 
@@ -1559,20 +1559,20 @@ authLogout(): Promise<void>
 3. Calls `storeOAuthAccountInfo()`
 4. `saveOAuthTokensIfNeeded()` + `clearOAuthTokenCache()`
 5. `fetchAndStoreUserRoles()` (best-effort)
-6. For claude.ai auth: `fetchAndStoreClaudeCodeFirstTokenDate()` (best-effort)
+6. For holy.ai auth: `fetchAndStoreHolyCodeFirstTokenDate()` (best-effort)
 7. For Console auth: `createAndStoreApiKey()` (required — throws if fails)
 8. `clearAuthRelatedCaches()`
 
-**`authLogin()`** fast path: When `CLAUDE_CODE_OAUTH_REFRESH_TOKEN` env var is set, exchanges directly via `refreshOAuthToken()`, skipping browser OAuth flow. Requires `CLAUDE_CODE_OAUTH_SCOPES` env var (space-separated scopes).
+**`authLogin()`** fast path: When `HOLY_CODE_OAUTH_REFRESH_TOKEN` env var is set, exchanges directly via `refreshOAuthToken()`, skipping browser OAuth flow. Requires `HOLY_CODE_OAUTH_SCOPES` env var (space-separated scopes).
 
 **`authStatus()`** JSON output fields:
 ```json
 {
   "loggedIn": boolean,
-  "authMethod": "none" | "claude.ai" | "api_key_helper" | "oauth_token" | "api_key" | "third_party",
+  "authMethod": "none" | "holy.ai" | "api_key_helper" | "oauth_token" | "api_key" | "third_party",
   "apiProvider": string,
   "apiKeySource": string,       // Present when apiKey
-  "email": string | null,       // Present when claude.ai
+  "email": string | null,       // Present when holy.ai
   "orgId": string | null,
   "orgName": string | null,
   "subscriptionType": string | null
@@ -1609,7 +1609,7 @@ mcpRemoveHandler(name, { scope? }): Promise<void>
 
 ### cli/handlers/plugins.ts (partial)
 
-Handlers for `claude plugin *` and marketplace commands:
+Handlers for `holy plugin *` and marketplace commands:
 - `installPlugin`, `uninstallPlugin`, `enablePlugin`, `disablePlugin`
 - `listPlugins`, `marketplaceSearch`, `addMarketplace`, `removeMarketplace`
 
@@ -1628,7 +1628,7 @@ The main SDK `-p` (print mode) handler. Orchestrates:
 update(): Promise<void>
 ```
 
-Handles `claude update`. Checks current version, detects install type, selects updater (npm global, native binary, local). Shows warnings for multiple installations.
+Handles `holy update`. Checks current version, detects install type, selects updater (npm global, native binary, local). Shows warnings for multiple installations.
 
 ---
 
@@ -1648,8 +1648,8 @@ Bidirectional streaming for SDK mode. Extends `StructuredIO`.
 
 **Constructor behavior:**
 1. Creates `PassThrough` input stream.
-2. Reads `CLAUDE_CODE_SESSION_ACCESS_TOKEN` for initial auth headers.
-3. Reads `CLAUDE_CODE_ENVIRONMENT_RUNNER_VERSION` for `x-environment-runner-version` header.
+2. Reads `HOLY_CODE_SESSION_ACCESS_TOKEN` for initial auth headers.
+3. Reads `HOLY_CODE_ENVIRONMENT_RUNNER_VERSION` for `x-environment-runner-version` header.
 4. Creates `refreshHeaders` closure that re-reads the token dynamically on reconnects.
 5. Calls `getTransportForUrl()` to get transport (WS, Hybrid, or SSE).
 
@@ -1866,13 +1866,13 @@ Lazy-loads `App` and `REPL` components and renders them wrapped in the React tre
 | `CLAUDE_BRIDGE_OAUTH_TOKEN` | Ant-only: override OAuth token for bridge |
 | `CLAUDE_BRIDGE_BASE_URL` | Ant-only: override API base URL |
 | `CLAUDE_TRUSTED_DEVICE_TOKEN` | Override trusted device token from env |
-| `CLAUDE_CODE_USE_CCR_V2` | Use SSETransport + CCRClient for all sessions |
-| `CLAUDE_CODE_POST_FOR_SESSION_INGRESS_V2` | Use HybridTransport (WS reads + POST writes) |
-| `CLAUDE_CODE_CCR_MIRROR` | Enable CCR mirror mode |
-| `CLAUDE_CODE_SESSION_ACCESS_TOKEN` | Session ingress auth token |
-| `CLAUDE_CODE_ENVIRONMENT_RUNNER_VERSION` | Sent as `x-environment-runner-version` header |
-| `CLAUDE_CODE_OAUTH_REFRESH_TOKEN` | Fast-path login via token exchange |
-| `CLAUDE_CODE_OAUTH_SCOPES` | Required when `CLAUDE_CODE_OAUTH_REFRESH_TOKEN` is set |
+| `HOLY_CODE_USE_CCR_V2` | Use SSETransport + CCRClient for all sessions |
+| `HOLY_CODE_POST_FOR_SESSION_INGRESS_V2` | Use HybridTransport (WS reads + POST writes) |
+| `HOLY_CODE_CCR_MIRROR` | Enable CCR mirror mode |
+| `HOLY_CODE_SESSION_ACCESS_TOKEN` | Session ingress auth token |
+| `HOLY_CODE_ENVIRONMENT_RUNNER_VERSION` | Sent as `x-environment-runner-version` header |
+| `HOLY_CODE_OAUTH_REFRESH_TOKEN` | Fast-path login via token exchange |
+| `HOLY_CODE_OAUTH_SCOPES` | Required when `HOLY_CODE_OAUTH_REFRESH_TOKEN` is set |
 
 ---
 
@@ -2109,7 +2109,7 @@ Enroll device for elevated security sessions.
 
 **Request:**
 ```json
-{ "display_name": "Claude Code on hostname · darwin" }
+{ "display_name": "Holy Code on hostname · darwin" }
 ```
 
 **Response:**
@@ -2230,4 +2230,4 @@ All NDJSON-format messages (used in child process stdio) must escape `U+2028` an
 
 ---
 
-*Document generated from source analysis of Claude Code codebase, 2026-03-31.*
+*Document generated from source analysis of Holy Code codebase, 2026-03-31.*

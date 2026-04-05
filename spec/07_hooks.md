@@ -1,4 +1,4 @@
-# Claude Code — React Hooks
+# Holy Code — React Hooks
 
 This document covers every hook in `src/hooks/`, `src/hooks/toolPermission/`, and `src/hooks/notifs/`. For each hook the entry covers: purpose, parameters/props, return value, key logic and side effects, and dependencies.
 
@@ -25,14 +25,14 @@ This document covers every hook in `src/hooks/`, `src/hooks/toolPermission/`, an
 
 **File:** `hooks/useAfterFirstRender.ts`
 
-**Purpose:** ANT-internal startup-time measurement hook. After the first render it writes startup time to stderr and calls `process.exit(0)` if the `CLAUDE_CODE_EXIT_AFTER_FIRST_RENDER` environment variable is set.
+**Purpose:** ANT-internal startup-time measurement hook. After the first render it writes startup time to stderr and calls `process.exit(0)` if the `HOLY_CODE_EXIT_AFTER_FIRST_RENDER` environment variable is set.
 
 **Parameters:** none
 
 **Return Value:** `void`
 
 **Key Logic:**
-- Reads env var `CLAUDE_CODE_EXIT_AFTER_FIRST_RENDER`.
+- Reads env var `HOLY_CODE_EXIT_AFTER_FIRST_RENDER`.
 - Uses a `useEffect` on `[]` to fire after first commit.
 - Computes elapsed ms from `MACRO.STARTUP_TIMESTAMP`, writes to `process.stderr`, then exits.
 
@@ -716,7 +716,7 @@ This document covers every hook in `src/hooks/`, `src/hooks/toolPermission/`, an
 
 **Key Logic:**
 - Detects suggestion context from input: `@token` triggers file/resource/agent suggestions; `/` triggers command suggestions; `#channel` triggers Slack channel suggestions (if Slack MCP present).
-- File suggestions use `generateUnifiedSuggestions` (nucleo + Fuse.js ranked).
+- File suggestions use `generateUnifiedSuggestions` (native matcher + Fuse.js ranked).
 - Command suggestions use `generateCommandSuggestions` with argument hint generation.
 - Shell completions use `getShellCompletions` for bash/zsh completions.
 - Path completions use `getPathCompletions` / `getDirectoryCompletions`.
@@ -1284,7 +1284,7 @@ This document covers every hook in `src/hooks/`, `src/hooks/toolPermission/`, an
 
 **File:** `hooks/useRemoteSession.ts`
 
-**Purpose:** Full CCR (Claude Code Remote) WebSocket session management. Handles bidirectional message conversion, streaming tool uses, permission request/response flow, response timeout detection, session title updates, and subagent task counting.
+**Purpose:** Full CCR (Holy Code Remote) WebSocket session management. Handles bidirectional message conversion, streaming tool uses, permission request/response flow, response timeout detection, session title updates, and subagent task counting.
 
 **Parameters:** Large props object including:
 - `config: AppConfig`
@@ -1419,7 +1419,7 @@ This document covers every hook in `src/hooks/`, `src/hooks/toolPermission/`, an
 
 **File:** `hooks/usePromptsFromClaudeInChrome.tsx`
 
-**Purpose:** Listens for prompts sent from the Claude in Chrome extension via MCP notifications. Also syncs the current permission mode to the extension.
+**Purpose:** Listens for prompts sent from the Holy in Chrome extension via MCP notifications. Also syncs the current permission mode to the extension.
 
 **Parameters:**
 - `mcpClients: MCPServerConnection[]`
@@ -1459,18 +1459,18 @@ This document covers every hook in `src/hooks/`, `src/hooks/toolPermission/`, an
 
 ---
 
-### `useClaudeCodeHintRecommendation`
+### `useHolyCodeHintRecommendation`
 
-**File:** `hooks/useClaudeCodeHintRecommendation.tsx`
+**File:** `hooks/useHolyCodeHintRecommendation.tsx`
 
-**Purpose:** Surfaces plugin install prompts from `<claude-code-hint />` tags parsed from Claude's responses. Show-once semantics per plugin per session.
+**Purpose:** Surfaces plugin install prompts from `<holy-code-hint />` tags parsed from Claude's responses. Show-once semantics per plugin per session.
 
 **Parameters:** none
 
 **Return Value:** `{ recommendation: PluginRecommendation | null, handleResponse: (accepted: boolean) => void }`
 
 **Key Logic:**
-- Monitors `messages` for assistant messages containing `<claude-code-hint plugin="name" />` XML.
+- Monitors `messages` for assistant messages containing `<holy-code-hint plugin="name" />` XML.
 - Uses `usePluginRecommendationBase` state machine to gate display.
 - `handleResponse(true)`: installs the plugin; `false`: dismisses.
 
@@ -1898,7 +1898,7 @@ All hooks in `notifs/` use `useNotifications()` from `context/notifications.js` 
 
 **File:** `hooks/notifs/useNpmDeprecationNotification.tsx`
 
-**Purpose:** Shows a 15-second warning notification when Claude Code is running via an npm install (deprecated) rather than the native installer.
+**Purpose:** Shows a 15-second warning notification when Holy Code is running via an npm install (deprecated) rather than the native installer.
 
 **Key Logic:**
 - Skips if `isInBundledMode()` or `DISABLE_INSTALLATION_CHECKS` env var is set.
@@ -2100,7 +2100,7 @@ These files live in `hooks/` but are not React hooks.
 **File:** `hooks/fileSuggestions.ts`
 
 **Exports:**
-- `generateFileSuggestions(query, cwd, ...) → Promise<SuggestionItem[]>` — main entry point. Manages a `FileIndex` singleton (native Rust/nucleo), fetches tracked files via `git ls-files`, falls back to `ripgrep`. Returns up to 15 scored matches.
+- `generateFileSuggestions(query, cwd, ...) → Promise<SuggestionItem[]>` — main entry point. Manages a `FileIndex` singleton (native Go file indexer), fetches tracked files via `git ls-files`, falls back to `ripgrep`. Returns up to 15 scored matches.
 - `startBackgroundCacheRefresh(cwd)` — queues a background refresh of untracked files.
 - `clearFileSuggestionCaches()` — called on `/clear` to reset the index.
 - `applyFileSuggestion(suggestion, inputValue, cursorOffset) → string` — replaces the `@token` in the input with the chosen file path.
@@ -2119,10 +2119,10 @@ These files live in `hooks/` but are not React hooks.
 **File:** `hooks/unifiedSuggestions.ts`
 
 **Exports:**
-- `generateUnifiedSuggestions(query, mcpResources, agents, showOnEmpty) → Promise<SuggestionItem[]>` — merges file suggestions (nucleo), MCP resource suggestions (Fuse.js), and agent suggestions into a ranked list of up to 15 items.
+- `generateUnifiedSuggestions(query, mcpResources, agents, showOnEmpty) → Promise<SuggestionItem[]>` — merges file suggestions (native matcher), MCP resource suggestions (Fuse.js), and agent suggestions into a ranked list of up to 15 items.
 
 **Key Design:**
-- File suggestions use nucleo score (0–1 float).
+- File suggestions use the native matcher score (0–1 float).
 - MCP resource suggestions use Fuse.js score (lower = better, inverted for sorting).
 - Agent suggestions always appended at lower priority.
 

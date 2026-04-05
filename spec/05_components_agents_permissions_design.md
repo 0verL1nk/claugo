@@ -1,6 +1,6 @@
-# Claude Code — Components: Agents, Permissions, Design System & Feature Modules
+# Holy Code — Components: Agents, Permissions, Design System & Feature Modules
 
-This document provides an exhaustive spec for all components in the `src/components/` subdirectories covering agents management, permission UIs, the design system primitives, and the many feature-specific modules (MCP, memory, tasks, teams, diff, grove, hooks, HelpV2, TrustDialog, ManagedSettingsSecurityDialog, ClaudeCodeHint, HighlightedCode, LogoV2, DesktopUpsell, FeedbackSurvey, LspRecommendation, Passes, Spinner, PromptInput, CustomSelect, Settings, sandbox, shell, skills, ui, wizard).
+This document provides an exhaustive spec for all components in the `src/components/` subdirectories covering agents management, permission UIs, the design system primitives, and the many feature-specific modules (MCP, memory, tasks, teams, diff, grove, hooks, HelpV2, TrustDialog, ManagedSettingsSecurityDialog, HolyCodeHint, HighlightedCode, LogoV2, DesktopUpsell, FeedbackSurvey, LspRecommendation, Passes, Spinner, PromptInput, CustomSelect, Settings, sandbox, shell, skills, ui, wizard).
 
 ---
 
@@ -20,7 +20,7 @@ This document provides an exhaustive spec for all components in the `src/compone
 12. [HelpV2/](#12-helpv2)
 13. [TrustDialog/](#13-trustdialog)
 14. [ManagedSettingsSecurityDialog/](#14-managedsettingssecuritydialog)
-15. [ClaudeCodeHint/](#15-claudecodehint)
+15. [HolyCodeHint/](#15-claudecodehint)
 16. [HighlightedCode/](#16-highlightedcode)
 17. [LogoV2/](#17-logov2)
 18. [DesktopUpsell/](#18-desktopupsell)
@@ -40,7 +40,7 @@ This document provides an exhaustive spec for all components in the `src/compone
 
 ## 1. agents/
 
-The agents subsystem provides a full UI for creating, viewing, editing, deleting, and listing custom Claude sub-agents (stored as Markdown files with YAML front matter in `.claude/agents/`).
+The agents subsystem provides a full UI for creating, viewing, editing, deleting, and listing custom Claude sub-agents (stored as Markdown files with YAML front matter in `.holy/agents/`).
 
 ### 1.1 AgentDetail
 
@@ -396,7 +396,7 @@ async function generateAgent(
 **Exports:**
 ```typescript
 const AGENT_PATHS = {
-  FOLDER_NAME: '.claude',
+  FOLDER_NAME: '.holy',
   AGENTS_DIR: 'agents',
 } as const
 
@@ -500,7 +500,7 @@ type Props = {
 ### 1.15 Wizard Steps
 
 #### LocationStep
-Offers two options: "Project (.claude/agents/)" (`projectSettings`) or "Personal (~/.claude/agents/)" (`userSettings`). Updates `wizardData.location` and calls `goNext()`.
+Offers two options: "Project (.holy/agents/)" (`projectSettings`) or "Personal (~/.holy/agents/)" (`userSettings`). Updates `wizardData.location` and calls `goNext()`.
 
 #### MethodStep
 Offers "Generate with Claude (recommended)" or "Manual configuration". For generate: sets `wizardData.method = 'generate'`, `wasGenerated: true`, `goNext()`. For manual: sets `method: 'manual'`, `wasGenerated: false`, skips to step 3 via `goToStep(3)`.
@@ -1522,7 +1522,7 @@ Background task and remote session monitoring UI.
 | `BackgroundTasksDialog.tsx` | Full dialog listing all background tasks |
 | `DreamDetailDialog.tsx` | Detail for a "dream" (autoDream background consolidation) task |
 | `InProcessTeammateDetailDialog.tsx` | Detail for an in-process swarm teammate |
-| `RemoteSessionDetailDialog.tsx` | Detail for a remote Claude Code session |
+| `RemoteSessionDetailDialog.tsx` | Detail for a remote Holy Code session |
 | `RemoteSessionProgress.tsx` | Progress display for remote session activity |
 | `ShellDetailDialog.tsx` | Detail for a shell background task |
 | `ShellProgress.tsx` | Progress line for shell commands |
@@ -1627,7 +1627,7 @@ Security warning for managed/policy settings.
 
 ---
 
-## 15. ClaudeCodeHint/
+## 15. HolyCodeHint/
 
 Plugin/command hint menu.
 

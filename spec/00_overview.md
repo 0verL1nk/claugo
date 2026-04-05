@@ -1,17 +1,17 @@
-# Claude Code — Master Architecture Overview
+# Holy Code — Master Architecture Overview
 
-> **Repository:** `X:\Bigger-Projects\Claude-Code`
+> **Repository:** `../ref/cloud-code/claude-code-source`
 > **Primary Language:** TypeScript/TSX (~1,902 files, ~800K+ LOC)
-> **Secondary Language:** Rust (~47 files, in-progress port)
+> **Rewrite Target:** This repository's Go implementation
 > **Bundler:** Bun
 > **UI Framework:** Custom Ink (React reconciler for terminal)
 > **Runtime Target:** Node.js / Bun CLI
 
 ---
 
-## 1. What Is Claude Code?
+## 1. What Is Holy Code?
 
-Claude Code is an AI-powered CLI tool and coding assistant. It is a full-featured interactive terminal application that:
+Holy Code is an AI-powered CLI tool and coding assistant. It is a full-featured interactive terminal application that:
 
 - Embeds a Claude AI model as an agentic coding assistant
 - Runs in the terminal using a custom React-based TUI (Terminal User Interface)
@@ -82,21 +82,18 @@ Claude-Code/
 │   ├── utils/                    # Utility functions (~564 files)
 │   └── voice/                    # Voice integration
 │
-├── claude-code-rust/             # Rust port (in-progress, 47 files)
-│   ├── Cargo.toml                # Workspace manifest
-│   ├── tools/                    # 27 files — tool implementations
-│   ├── query/                    # 5 files — query system
-│   ├── cli/                      # 3 files — CLI framework
-│   ├── api/                      # 2 files — API bindings
-│   ├── bridge/                   # 2 files — bridge protocol
-│   ├── commands/                 # 2 files — command system
-│   ├── core/                     # 2 files — core utilities
-│   ├── mcp/                      # 2 files — MCP integration
-│   └── tui/                      # 2 files — terminal UI
-│
 ├── public/                       # Static assets
 ├── README.md                     # Main documentation (27KB)
 └── .git/                         # Git metadata
+```
+
+Separate from the reference source above, **this repository** is the Go rewrite target described by these specs. Its planned root layout is:
+
+```text
+.
+├── go.mod
+├── cmd/holy/
+└── internal/
 ```
 
 ---
@@ -189,7 +186,7 @@ The core loop that:
 
 ### 4.7 Memory System (`memdir/`, `services/SessionMemory/`, `services/autoDream/`)
 - Short-term: session history
-- Long-term: memdir (markdown files in `~/.claude/memory/`)
+- Long-term: memdir (markdown files in `~/.holy/memory/`)
 - Auto-consolidation: "dream" service consolidates memories during idle
 - Memory scanning/relevance scoring for context injection
 
@@ -221,7 +218,7 @@ The core loop that:
 3. If slash command: dispatched to command handler
 4. If regular prompt: sent to query.ts runQuery()
 5. QueryEngine builds API request:
-   - System prompt (from constants/prompts.ts + CLAUDE.md)
+   - System prompt (from constants/prompts.ts + HOLY.md)
    - Message history (from history.ts)
    - Available tools (filtered by permission)
    - Token budget constraints
@@ -256,14 +253,14 @@ The core loop that:
 
 ## 7. Permission Model
 
-Claude Code uses a layered permission system:
+Holy Code uses a layered permission system:
 
 1. **Automatic** — Read-only operations, info queries
 2. **Ask Once** — Prompt user, remember for session
 3. **Ask Always** — Prompt user every time
 4. **Deny** — Block completely
 
-Permission rules are stored in settings (global `~/.claude/settings.json`, project `.claude/settings.json`) and can be configured with patterns.
+Permission rules are stored in settings (global `~/.holy/settings.json`, project `.holy/settings.json`) and can be configured with patterns.
 
 Permission categories:
 - `Bash` — Shell command execution
@@ -280,9 +277,9 @@ Permission categories:
 
 Layered settings (in priority order):
 1. **Managed** — Enterprise/managed settings (read-only)
-2. **Local project** — `.claude/settings.local.json` (gitignored)
-3. **Project** — `.claude/settings.json` (shared)
-4. **Global** — `~/.claude/settings.json`
+2. **Local project** — `.holy/settings.local.json` (gitignored)
+3. **Project** — `.holy/settings.json` (shared)
+4. **Global** — `~/.holy/settings.json`
 
 Settings include: model selection, permission rules, API key, theme, keybindings, MCP server configurations, beta features.
 
@@ -326,9 +323,9 @@ Current defaults (as of source): `claude-sonnet-4-6` and `claude-opus-4-6`
 | `10_utils.md` | All utility functions (~564 files) |
 | `11_special_systems.md` | Buddy, memory, keybindings, skills, voice, plugins |
 | `12_constants_types.md` | All constants, types, and configuration |
-| `13_rust_codebase.md` | Rust port/rewrite |
+| `13_go_codebase.md` | Go port/rewrite |
 | `INDEX.md` | Quick-reference index |
 
 ---
 
-*Generated from source analysis of the Claude Code codebase. ~1,902 TypeScript/TSX files, ~800K+ lines of code.*
+*Generated from source analysis of the Holy Code codebase. ~1,902 TypeScript/TSX files, ~800K+ lines of code.*

@@ -1,6 +1,6 @@
-# Claude Code — Commands Reference
+# Holy Code — Commands Reference
 
-This document is an exhaustive reference for every slash command in the Claude Code CLI, derived directly from the source in `src/commands/` and the top-level registry in `src/commands.ts`.
+This document is an exhaustive reference for every slash command in the Holy Code CLI, derived directly from the source in `src/commands/` and the top-level registry in `src/commands.ts`.
 
 ---
 
@@ -47,7 +47,7 @@ This document is an exhaustive reference for every slash command in the Claude C
    - [fast](#fast)
    - [feedback / bug](#feedback--bug)
    - [files](#files)
-   - [good-claude](#good-claude-stub)
+   - [good-holy](#good-holy-stub)
    - [heapdump](#heapdump)
    - [help](#help)
    - [hooks](#hooks)
@@ -120,7 +120,7 @@ This document is an exhaustive reference for every slash command in the Claude C
 
 ## 1. Command System Architecture
 
-All slash commands in Claude Code share a unified `Command` interface defined in `src/types/command.ts` and re-exported from `src/commands.ts`. The command registry is loaded lazily (memoized) in `commands.ts` and is assembled from several sources:
+All slash commands in Holy Code share a unified `Command` interface defined in `src/types/command.ts` and re-exported from `src/commands.ts`. The command registry is loaded lazily (memoized) in `commands.ts` and is assembled from several sources:
 
 ```
 Priority order in getCommands():
@@ -153,7 +153,7 @@ interface CommandBase {
   argumentHint?: string
   isEnabled?: () => boolean
   isHidden?: boolean
-  availability?: Array<'claude-ai' | 'console'>
+  availability?: Array<'holy-ai' | 'console'>
   source?: 'builtin' | 'plugin' | 'mcp' | 'bundled' | string
   load: () => Promise<{ call: Function }>
 }
@@ -193,7 +193,7 @@ interface PromptCommand extends CommandBase {
 | Export | Description |
 |--------|-------------|
 | `getCommands(cwd)` | Async; returns all commands filtered by `meetsAvailabilityRequirement` and `isCommandEnabled`. Memoized per-cwd for expensive loading; availability/isEnabled run fresh every call. |
-| `INTERNAL_ONLY_COMMANDS` | Array of commands only available when `USER_TYPE === 'ant'`. Includes backfill-sessions, break-cache, bughunter, commit, commit-push-pr, ctx_viz, good-claude, issue, init-verifiers, mock-limits, bridge-kick, version, ultraplan, subscribePr, resetLimits, onboarding, share, summary, teleport, ant-trace, perf-issue, env, oauth-refresh, debug-tool-call, agents-platform, autofix-pr. |
+| `INTERNAL_ONLY_COMMANDS` | Array of commands only available when `USER_TYPE === 'ant'`. Includes backfill-sessions, break-cache, bughunter, commit, commit-push-pr, ctx_viz, good-holy, issue, init-verifiers, mock-limits, bridge-kick, version, ultraplan, subscribePr, resetLimits, onboarding, share, summary, teleport, ant-trace, perf-issue, env, oauth-refresh, debug-tool-call, agents-platform, autofix-pr. |
 | `REMOTE_SAFE_COMMANDS` | `Set<Command>` of commands safe in remote (--remote) mode: session, exit, clear, help, theme, color, vim, cost, usage, copy, btw, feedback, plan, keybindings, statusline, stickers, mobile. |
 | `BRIDGE_SAFE_COMMANDS` | `Set<Command>` of `'local'` commands safe over the Remote Control bridge: compact, clear, cost, summary, release-notes, files. |
 | `builtInCommandNames` | Memoized `Set<string>` of all built-in command names and aliases. |
@@ -252,7 +252,7 @@ The following commands are conditionally registered using `feature()` bundle fla
 - If no path is provided, opens the `AddWorkspaceDirectory` interactive picker component.
 - On success, calls `applyPermissionUpdate` (session) and optionally `persistPermissionUpdate` (local settings).
 - Also calls `SandboxManager.refreshConfig()` to update bash sandboxing configuration.
-- Updates bootstrap state for additional CLAUDE.md directories.
+- Updates bootstrap state for additional HOLY.md directories.
 
 **Validation (validation.ts):**
 
@@ -496,9 +496,9 @@ The implementation (`bridge.tsx`) is a large file (~34KB) rendering a multi-step
 
 **Type:** `local-jsx`
 **Syntax:** `/chrome`
-**Description:** Claude in Chrome (Beta) settings. Available only to `claude-ai` subscribers and non-interactive session check.
+**Description:** Holy in Chrome (Beta) settings. Available only to `holy-ai` subscribers and non-interactive session check.
 
-**Gate:** `availability: ['claude-ai']`, `isEnabled: () => !getIsNonInteractiveSession()`
+**Gate:** `availability: ['holy-ai']`, `isEnabled: () => !getIsNonInteractiveSession()`
 
 The implementation (`chrome.tsx`, ~23KB) renders a settings panel for managing the Claude Chrome extension integration.
 
@@ -514,7 +514,7 @@ The implementation (`chrome.tsx`, ~23KB) renders a settings panel for managing t
 **Description:** Clear conversation history and free up context. Starts a fresh session.
 
 **Core function (`clearConversation`):**
-1. Executes `SessionEnd` hooks (bounded by `CLAUDE_CODE_SESSIONEND_HOOKS_TIMEOUT_MS`, default 1.5s).
+1. Executes `SessionEnd` hooks (bounded by `HOLY_CODE_SESSIONEND_HOOKS_TIMEOUT_MS`, default 1.5s).
 2. Emits `tengu_cache_eviction_hint` analytics event.
 3. Identifies background tasks to preserve (tasks with `isBackgrounded !== false`).
 4. Clears messages: `setMessages(() => [])`.
@@ -612,7 +612,7 @@ mcp__claude_ai_Slack__slack_send_message
 **Prompt behavior:**
 - Injects live shell output for: `git status`, `git diff HEAD`, `git branch --show-current`, `git diff ${defaultBranch}...HEAD`, `gh pr view --json number`.
 - Orchestrates: create branch if on main, commit, push, create/update PR.
-- Optionally posts to Slack if CLAUDE.md mentions Slack channels (uses ToolSearch).
+- Optionally posts to Slack if HOLY.md mentions Slack channels (uses ToolSearch).
 - PR body template includes Summary, Test plan, Changelog sections.
 - Includes `getEnhancedPRAttribution()` text.
 
@@ -711,11 +711,11 @@ The implementation (`copy.tsx`, ~31KB) handles clipboard access, finds the most 
 **Description:** Show the total cost and duration of the current session.
 
 **Behavior:**
-- For `claude-ai` subscribers: shows subscription usage message (or overage notice).
+- For `holy-ai` subscribers: shows subscription usage message (or overage notice).
 - For API users: calls `formatTotalCost()` to show token cost.
 - ANT users always see cost breakdown even if subscriber.
 
-**Gate:** Hidden for claude.ai subscribers (except ANT users).
+**Gate:** Hidden for holy.ai subscribers (except ANT users).
 **`supportsNonInteractive: true`**
 
 ---
@@ -767,7 +767,7 @@ export function createMovedToPluginCommand(options: {
 **Description:** Continue the current session in Claude Desktop via handoff.
 
 **Gate:**
-- `availability: ['claude-ai']`
+- `availability: ['holy-ai']`
 - `isEnabled`: only macOS or Windows x64
 
 **Behavior:** Renders `DesktopHandoff` component which generates a handoff token/URL to open in the Claude Desktop app.
@@ -790,7 +790,7 @@ export function createMovedToPluginCommand(options: {
 
 **Type:** `local-jsx`
 **Syntax:** `/doctor`
-**Description:** Run diagnostics on the Claude Code installation: API key validity, model access, MCP connectivity, LSP status, plugin health, etc.
+**Description:** Run diagnostics on the Holy Code installation: API key validity, model access, MCP connectivity, LSP status, plugin health, etc.
 
 **Gate:** `isEnabled: () => !isEnvTruthy(process.env.DISABLE_DOCTOR_COMMAND)`
 
@@ -820,7 +820,7 @@ export function createMovedToPluginCommand(options: {
 - Calls `toPersistableEffort()` — some levels are session-only.
 - Persists persistable values to `userSettings.effortLevel`.
 - Logs `tengu_effort_command` analytics event.
-- If `CLAUDE_CODE_EFFORT_LEVEL` env var is set and conflicts with the requested value, warns the user.
+- If `HOLY_CODE_EFFORT_LEVEL` env var is set and conflicts with the requested value, warns the user.
 
 **`immediate`:** Dynamically set by `shouldInferenceConfigCommandBeImmediate()`.
 
@@ -884,7 +884,7 @@ The implementation (~31KB) handles multiple formats, clipboard copy, and file ou
    - If unlimited overage already enabled → "already have unlimited."
    - If admin request pending/dismissed → "already submitted."
    - Creates an `admin_request` of type `limit_increase`.
-4. For users with billing access or individual plans: opens browser to `claude.ai/settings/usage` or `claude.ai/admin-settings/usage`.
+4. For users with billing access or individual plans: opens browser to `holy.ai/settings/usage` or `holy.ai/admin-settings/usage`.
 
 ---
 
@@ -897,7 +897,7 @@ The implementation (~31KB) handles multiple formats, clipboard copy, and file ou
 **Description:** Toggle "fast mode" — switches to a faster, cheaper model (displayed as `FAST_MODE_MODEL_DISPLAY`).
 
 **Gate:**
-- `availability: ['claude-ai', 'console']`
+- `availability: ['holy-ai', 'console']`
 - `isEnabled: () => isFastModeEnabled()`
 - `isHidden: !isFastModeEnabled()`
 
@@ -919,10 +919,10 @@ The implementation (~31KB) handles multiple formats, clipboard copy, and file ou
 **Type:** `local-jsx`
 **Syntax:** `/feedback [report]`
 **Aliases:** `bug`
-**Description:** Submit feedback or bug reports about Claude Code.
+**Description:** Submit feedback or bug reports about Holy Code.
 
 **Gate:** Disabled when:
-- `CLAUDE_CODE_USE_BEDROCK`, `CLAUDE_CODE_USE_VERTEX`, `CLAUDE_CODE_USE_FOUNDRY` are set
+- `HOLY_CODE_USE_BEDROCK`, `HOLY_CODE_USE_VERTEX`, `HOLY_CODE_USE_FOUNDRY` are set
 - `DISABLE_FEEDBACK_COMMAND` or `DISABLE_BUG_COMMAND` set
 - `isEssentialTrafficOnly()` is true
 - `USER_TYPE === 'ant'`
@@ -946,9 +946,9 @@ The implementation (~31KB) handles multiple formats, clipboard copy, and file ou
 
 ---
 
-### `/good-claude` (stub)
+### `/good-holy` (stub)
 
-**File:** `commands/good-claude/index.js`
+**File:** `commands/good-holy/index.js`
 
 **Type:** Stub — disabled in all external builds.
 
@@ -1007,19 +1007,19 @@ The implementation (~31KB) handles multiple formats, clipboard copy, and file ou
 
 **Type:** `prompt`
 **Syntax:** `/init`
-**Description:** Initialize CLAUDE.md (and optionally skills/hooks) for the current repository.
+**Description:** Initialize HOLY.md (and optionally skills/hooks) for the current repository.
 
 **Two prompt variants (feature-gated):**
 
-**Old prompt (`OLD_INIT_PROMPT`):** Analyzes the codebase and creates a minimal CLAUDE.md with commands, architecture overview.
+**Old prompt (`OLD_INIT_PROMPT`):** Analyzes the codebase and creates a minimal HOLY.md with commands, architecture overview.
 
-**New prompt (`NEW_INIT_PROMPT`, enabled by `NEW_INIT` flag or `CLAUDE_CODE_NEW_INIT=1`):** Multi-phase interactive setup:
-- Phase 1: Ask what to set up (project CLAUDE.md, personal CLAUDE.local.md, skills, hooks)
-- Phase 2: Explore codebase (manifest files, README, CI config, existing CLAUDE.md, linter config, git worktrees)
+**New prompt (`NEW_INIT_PROMPT`, enabled by `NEW_INIT` flag or `HOLY_CODE_NEW_INIT=1`):** Multi-phase interactive setup:
+- Phase 1: Ask what to set up (project HOLY.md, personal HOLY.local.md, skills, hooks)
+- Phase 2: Explore codebase (manifest files, README, CI config, existing HOLY.md, linter config, git worktrees)
 - Phase 3: Fill in gaps via `AskUserQuestion`
-- Phase 4: Write CLAUDE.md at project root
-- Phase 5: Write CLAUDE.local.md (added to .gitignore)
-- Phase 6: Suggest and create skills in `.claude/skills/`
+- Phase 4: Write HOLY.md at project root
+- Phase 5: Write HOLY.local.md (added to .gitignore)
+- Phase 6: Suggest and create skills in `.holy/skills/`
 - Phase 7: Suggest additional optimizations (GitHub CLI, linting, hooks, format-on-edit)
 - Phase 8: Summary and next steps (plugin suggestions)
 
@@ -1033,7 +1033,7 @@ The implementation (~31KB) handles multiple formats, clipboard copy, and file ou
 
 **Type:** `prompt`
 **Syntax:** `/init-verifiers`
-**Description:** Create verifier skill(s) for automated verification of code changes. Creates skills in `.claude/skills/` that can be used by the Verify agent.
+**Description:** Create verifier skill(s) for automated verification of code changes. Creates skills in `.holy/skills/` that can be used by the Verify agent.
 
 **Multi-phase workflow:**
 - Phase 1: Auto-detect project type and stack (web app → Playwright, CLI → Tmux, API → HTTP)
@@ -1058,12 +1058,12 @@ The implementation (~31KB) handles multiple formats, clipboard copy, and file ou
 
 **Type:** `prompt`
 **Syntax:** `/insights`
-**Description:** Generate an AI-powered report analyzing Claude Code usage sessions.
+**Description:** Generate an AI-powered report analyzing Holy Code usage sessions.
 
 **Implementation note:** This is a 113KB module (~3200 lines) that includes HTML rendering and diff utilities. It is registered in `commands.ts` as a lazy shim that dynamically imports the real module only when invoked, to avoid startup overhead.
 
 **Key features (from the module):**
-- Reads session files from `~/.claude/projects/`
+- Reads session files from `~/.holy/projects/`
 - Analyzes conversations, extracts facets and patterns
 - Runs summarization via Opus model
 - Generates HTML and diff-line reports
@@ -1080,7 +1080,7 @@ The implementation (~31KB) handles multiple formats, clipboard copy, and file ou
 **Description:** Interactive wizard to set up Claude GitHub Actions for a repository.
 
 **Gate:**
-- `availability: ['claude-ai', 'console']`
+- `availability: ['holy-ai', 'console']`
 - `isEnabled: () => !isEnvTruthy(process.env.DISABLE_INSTALL_GITHUB_APP_COMMAND)`
 
 **Wizard steps** (each is a separate React component):
@@ -1111,7 +1111,7 @@ The implementation (~31KB) handles multiple formats, clipboard copy, and file ou
 **Syntax:** `/install-slack-app`
 **Description:** Open the Claude Slack app installation page in the browser.
 
-**Gate:** `availability: ['claude-ai']`
+**Gate:** `availability: ['holy-ai']`
 
 **Behavior:**
 - Logs `tengu_install_slack_app_clicked` event.
@@ -1214,7 +1214,7 @@ This is a large (~27KB) React component used during the onboarding flow, not a s
 **CLI subcommands (`mcp add` via `addCommand.ts`):**
 
 ```
-claude mcp add <name> <commandOrUrl> [args...]
+holy mcp add <name> <commandOrUrl> [args...]
   -s, --scope <scope>        Configuration scope: local, user, project (default: local)
   -t, --transport <type>     Transport: stdio, sse, http (default: stdio)
   -e, --env <env...>         Environment variables (KEY=value)
@@ -1225,7 +1225,7 @@ claude mcp add <name> <commandOrUrl> [args...]
   --xaa                      Enable XAA (SEP-990) authentication
 ```
 
-**XAA IdP subcommands (`claude mcp xaa` via `xaaIdpCommand.ts`):**
+**XAA IdP subcommands (`holy mcp xaa` via `xaaIdpCommand.ts`):**
 
 | Subcommand | Description |
 |---|---|
@@ -1248,7 +1248,7 @@ claude mcp add <name> <commandOrUrl> [args...]
 
 **Type:** `local-jsx`
 **Syntax:** `/memory`
-**Description:** Edit Claude memory files (CLAUDE.md, CLAUDE.local.md, etc.).
+**Description:** Edit Claude memory files (HOLY.md, HOLY.local.md, etc.).
 
 ---
 
@@ -1277,7 +1277,7 @@ claude mcp add <name> <commandOrUrl> [args...]
 
 **Type:** `local-jsx`
 **Syntax:** `/model [model]`
-**Description:** Set the AI model for Claude Code. Description dynamically shows the currently selected model.
+**Description:** Set the AI model for Holy Code. Description dynamically shows the currently selected model.
 
 **`immediate`:** Set by `shouldInferenceConfigCommandBeImmediate()`.
 
@@ -1317,7 +1317,7 @@ claude mcp add <name> <commandOrUrl> [args...]
 
 **Type:** `local-jsx`
 **Syntax:** `/passes`
-**Description:** Share a free week of Claude Code with friends (referral passes). Optionally shows "earn extra usage" if referrer rewards are available.
+**Description:** Share a free week of Holy Code with friends (referral passes). Optionally shows "earn extra usage" if referrer rewards are available.
 
 **Gate:** Hidden unless `checkCachedPassesEligibility().eligible && hasCache`.
 
@@ -1374,7 +1374,7 @@ claude mcp add <name> <commandOrUrl> [args...]
 **Type:** `local-jsx`
 **Syntax:** `/plugin [subcommand] [args]`
 **Aliases:** `plugins`, `marketplace`
-**Description:** Manage Claude Code plugins (install, uninstall, enable, disable, browse marketplace).
+**Description:** Manage Holy Code plugins (install, uninstall, enable, disable, browse marketplace).
 
 **Properties:** `immediate: true`
 
@@ -1420,7 +1420,7 @@ claude mcp add <name> <commandOrUrl> [args...]
 **Syntax:** `/pr-comments [PR number or args]`
 **Description:** Get comments from a GitHub pull request. Uses `gh` CLI to fetch PR-level and code review comments.
 
-**Plugin migration:** For `USER_TYPE === 'ant'`, directs to `pr-comments@claude-code-marketplace`. For external users, runs the embedded prompt.
+**Plugin migration:** For `USER_TYPE === 'ant'`, directs to `pr-comments@holy-code-marketplace`. For external users, runs the embedded prompt.
 
 **Fallback prompt logic:**
 1. `gh pr view --json number,headRepository` to get PR info.
@@ -1448,7 +1448,7 @@ claude mcp add <name> <commandOrUrl> [args...]
 
 **Type:** `local-jsx`
 **Syntax:** `/rate-limit-options`
-**Description:** Show options when the rate limit is reached (upgrade, extra usage, etc.). Shown only to `claude-ai` subscribers.
+**Description:** Show options when the rate limit is reached (upgrade, extra usage, etc.). Shown only to `holy-ai` subscribers.
 
 **`isHidden: true`** — only used internally (e.g., triggered from the rate-limit message component, not user-invoked).
 
@@ -1460,7 +1460,7 @@ claude mcp add <name> <commandOrUrl> [args...]
 
 **Type:** `local`
 **Syntax:** `/release-notes`
-**Description:** Display the changelog for Claude Code.
+**Description:** Display the changelog for Holy Code.
 
 **`supportsNonInteractive: true`**
 
@@ -1499,7 +1499,7 @@ claude mcp add <name> <commandOrUrl> [args...]
 **Description:** Configure the default remote environment for teleport sessions.
 
 **Gate:**
-- `isEnabled: () => isClaudeAISubscriber() && isPolicyAllowed('allow_remote_sessions')`
+- `isEnabled: () => isHolyAISubscriber() && isPolicyAllowed('allow_remote_sessions')`
 - Hidden when not eligible.
 
 ---
@@ -1510,10 +1510,10 @@ claude mcp add <name> <commandOrUrl> [args...]
 
 **Type:** `local-jsx`
 **Name:** `web-setup`
-**Description:** Set up Claude Code on the web (connects GitHub account).
+**Description:** Set up Holy Code on the web (connects GitHub account).
 
 **Gate:**
-- `availability: ['claude-ai']`
+- `availability: ['holy-ai']`
 - `isEnabled: () => getFeatureValue_CACHED_MAY_BE_STALE('tengu_cobalt_lantern', false) && isPolicyAllowed('allow_remote_sessions')`
 - Feature flag: `CCR_REMOTE_SETUP`
 
@@ -1586,7 +1586,7 @@ claude mcp add <name> <commandOrUrl> [args...]
 
 **Type:** `local-jsx`
 **Syntax:** `/ultrareview`
-**Description:** Deep automated bug-finding review running in Claude Code on the web (~10–20 min). Finds and verifies bugs in the current branch.
+**Description:** Deep automated bug-finding review running in Holy Code on the web (~10–20 min). Finds and verifies bugs in the current branch.
 
 **Gate:** `isEnabled: () => isUltrareviewEnabled()` — checks GrowthBook `tengu_review_bughunter_config.enabled`.
 
@@ -1632,7 +1632,7 @@ claude mcp add <name> <commandOrUrl> [args...]
 **Syntax:** `/security-review`
 **Description:** Complete a security-focused review of pending branch changes.
 
-**Plugin migration:** Directs `USER_TYPE === 'ant'` users to `security-review@claude-code-marketplace`.
+**Plugin migration:** Directs `USER_TYPE === 'ant'` users to `security-review@holy-code-marketplace`.
 
 **Fallback prompt:** Large SECURITY_REVIEW_MARKDOWN with:
 - Allowed tools: `Bash(git diff:*)`, `Bash(git status:*)`, `Bash(git log:*)`, `Bash(git show:*)`, `Bash(git remote show:*)`, `Read`, `Glob`, `Grep`, `LS`, `Task`
@@ -1683,7 +1683,7 @@ claude mcp add <name> <commandOrUrl> [args...]
 
 **Type:** `local-jsx`
 **Syntax:** `/stats`
-**Description:** Show Claude Code usage statistics and activity (sessions, token usage, costs over time).
+**Description:** Show Holy Code usage statistics and activity (sessions, token usage, costs over time).
 
 ---
 
@@ -1693,7 +1693,7 @@ claude mcp add <name> <commandOrUrl> [args...]
 
 **Type:** `local-jsx`
 **Syntax:** `/status`
-**Description:** Show comprehensive Claude Code status: version, model, account, API connectivity, tool statuses.
+**Description:** Show comprehensive Holy Code status: version, model, account, API connectivity, tool statuses.
 
 **Properties:** `immediate: true`
 
@@ -1705,9 +1705,9 @@ claude mcp add <name> <commandOrUrl> [args...]
 
 **Type:** `prompt`
 **Syntax:** `/statusline [description]`
-**Description:** Set up Claude Code's status line UI. Launches a specialized `statusline-setup` subagent.
+**Description:** Set up Holy Code's status line UI. Launches a specialized `statusline-setup` subagent.
 
-**Allowed tools:** `AgentTool`, `Read(~/**)`, `Edit(~/.claude/settings.json)`
+**Allowed tools:** `AgentTool`, `Read(~/**)`, `Edit(~/.holy/settings.json)`
 
 **`disableNonInteractive: true`**
 
@@ -1721,7 +1721,7 @@ claude mcp add <name> <commandOrUrl> [args...]
 
 **Type:** `local`
 **Syntax:** `/stickers`
-**Description:** Open the Claude Code sticker ordering page at `https://www.stickermule.com/claudecode`.
+**Description:** Open the Holy Code sticker ordering page at `https://www.stickermule.com/holycode`.
 
 **Gate:** `supportsNonInteractive: false`
 
@@ -1799,7 +1799,7 @@ claude mcp add <name> <commandOrUrl> [args...]
 
 **Type:** `local-jsx`
 **Syntax:** `/think-back`
-**Description:** "Your 2025 Claude Code Year in Review" — a year-in-review animation.
+**Description:** "Your 2025 Holy Code Year in Review" — a year-in-review animation.
 
 **Gate:** `isEnabled: () => checkStatsigFeatureGate_CACHED_MAY_BE_STALE('tengu_thinkback')`
 
@@ -1824,14 +1824,14 @@ claude mcp add <name> <commandOrUrl> [args...]
 
 **Type:** `local-jsx`
 **Syntax:** `/ultraplan [seed plan]`
-**Description:** Run an extended multi-agent planning session on Claude Code on the web (CCR). Explores the codebase, creates a comprehensive implementation plan, and enters plan-approval mode.
+**Description:** Run an extended multi-agent planning session on Holy Code on the web (CCR). Explores the codebase, creates a comprehensive implementation plan, and enters plan-approval mode.
 
 **Feature gate:** `ULTRAPLAN` bundle flag required.
 
 **Constants:**
 ```typescript
 const ULTRAPLAN_TIMEOUT_MS = 30 * 60 * 1000  // 30 min
-export const CCR_TERMS_URL = 'https://code.claude.com/docs/en/claude-code-on-the-web'
+export const CCR_TERMS_URL = 'https://code.holy.com/docs/en/holy-code-on-the-web'
 ```
 
 **Model:** From GrowthBook `tengu_ultraplan_model` (defaults to `ALL_MODEL_CONFIGS.opus46.firstParty`).
@@ -1856,7 +1856,7 @@ export const CCR_TERMS_URL = 'https://code.claude.com/docs/en/claude-code-on-the
 **Description:** Upgrade to Max plan for higher rate limits and more Opus access.
 
 **Gate:**
-- `availability: ['claude-ai']`
+- `availability: ['holy-ai']`
 - `isEnabled: () => !isEnvTruthy(DISABLE_UPGRADE_COMMAND) && getSubscriptionType() !== 'enterprise'`
 
 ---
@@ -1869,7 +1869,7 @@ export const CCR_TERMS_URL = 'https://code.claude.com/docs/en/claude-code-on-the
 **Syntax:** `/usage`
 **Description:** Show plan usage limits and current consumption.
 
-**Gate:** `availability: ['claude-ai']`
+**Gate:** `availability: ['holy-ai']`
 
 ---
 
@@ -1919,7 +1919,7 @@ export const CCR_TERMS_URL = 'https://code.claude.com/docs/en/claude-code-on-the
 **Description:** Toggle voice mode (speech-to-text input via push-to-talk).
 
 **Gate:**
-- `availability: ['claude-ai']`
+- `availability: ['holy-ai']`
 - `isEnabled: () => isVoiceGrowthBookEnabled()` — feature-flagged via GrowthBook
 - `isHidden: !isVoiceModeEnabled()`
 - Feature flag: `VOICE_MODE` bundle flag
@@ -1951,7 +1951,7 @@ These commands are registered only when `process.env.USER_TYPE === 'ant'` and `!
 | `commit` | Git commit via model |
 | `commit-push-pr` | Commit + push + PR via model |
 | `ctx_viz` | Stub (disabled) |
-| `good-claude` | Stub (disabled) |
+| `good-holy` | Stub (disabled) |
 | `issue` | Stub (disabled) |
 | `init-verifiers` | Create verifier skills |
 | `force-snip` | Force history snip (feature-gated) |
@@ -2003,8 +2003,8 @@ compact, clear, cost, summary, release-notes, files
 
 | Value | Meaning |
 |---|---|
-| `'claude-ai'` | Must be a claude.ai subscriber (`isClaudeAISubscriber()`) |
-| `'console'` | Must be a first-party API user (not 3P, not claude.ai, not custom baseURL) |
+| `'holy-ai'` | Must be a holy.ai subscriber (`isHolyAISubscriber()`) |
+| `'console'` | Must be a first-party API user (not 3P, not holy.ai, not custom baseURL) |
 
 Commands without `availability` are shown to all users.
 
@@ -2021,15 +2021,15 @@ Commands without `availability` are shown to all users.
 | `DISABLE_BUG_COMMAND` | Disables `/feedback` alias |
 | `DISABLE_UPGRADE_COMMAND` | Disables `/upgrade` |
 | `DISABLE_EXTRA_USAGE_COMMAND` | Disables `/extra-usage` |
-| `CLAUDE_CODE_USE_BEDROCK` | Disables `/feedback` |
-| `CLAUDE_CODE_USE_VERTEX` | Disables `/feedback` |
-| `CLAUDE_CODE_USE_FOUNDRY` | Disables `/feedback` |
+| `HOLY_CODE_USE_BEDROCK` | Disables `/feedback` |
+| `HOLY_CODE_USE_VERTEX` | Disables `/feedback` |
+| `HOLY_CODE_USE_FOUNDRY` | Disables `/feedback` |
 | `USER_TYPE=ant` | Enables internal-only commands |
 | `IS_DEMO=1` | Suppresses internal-only commands even for ant users |
-| `CLAUDE_CODE_NEW_INIT=1` | Enables new multi-phase `/init` prompt |
-| `CLAUDE_CODE_ENABLE_XAA=1` | Enables `--xaa` flag in `claude mcp add` |
-| `MCP_CLIENT_SECRET` | OAuth client secret for `claude mcp add --client-secret` |
-| `MCP_XAA_IDP_CLIENT_SECRET` | IdP client secret for `claude mcp xaa setup --client-secret` |
+| `HOLY_CODE_NEW_INIT=1` | Enables new multi-phase `/init` prompt |
+| `HOLY_CODE_ENABLE_XAA=1` | Enables `--xaa` flag in `holy mcp add` |
+| `MCP_CLIENT_SECRET` | OAuth client secret for `holy mcp add --client-secret` |
+| `MCP_XAA_IDP_CLIENT_SECRET` | IdP client secret for `holy mcp xaa setup --client-secret` |
 | `ULTRAPLAN_PROMPT_FILE` | Override ultraplan prompt (ant builds only) |
 
 ### Bun bundle feature flags

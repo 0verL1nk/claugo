@@ -1,4 +1,4 @@
-# Claude Code — Tools System
+# Holy Code — Tools System
 
 ## Table of Contents
 
@@ -264,7 +264,7 @@ Includes (conditionally):
 function getTools(permissionContext: ToolPermissionContext): Tool[]
 ```
 
-- If `CLAUDE_CODE_SIMPLE` env var is set: returns only `[BashTool, FileReadTool, FileEditTool]`
+- If `HOLY_CODE_SIMPLE` env var is set: returns only `[BashTool, FileReadTool, FileEditTool]`
 - Calls `getAllBaseTools()`, filters with `filterToolsByDenyRules()`
 - In REPL mode: hides `REPL_ONLY_TOOLS` (Bash, Read, Write, Edit, Glob, Grep, NotebookEdit, Agent)
 
@@ -564,7 +564,7 @@ class MaxFileReadTokenExceededError extends Error
 | `command` | `string` | Yes | Shell command to execute |
 | `timeout` | `number` | No | Timeout in milliseconds (max varies by context) |
 | `description` | `string` | No | Human-readable description of what the command does |
-| `run_in_background` | `boolean` | No | Launch as background task; omitted from schema when `CLAUDE_CODE_DISABLE_BACKGROUND_TASKS=true` |
+| `run_in_background` | `boolean` | No | Launch as background task; omitted from schema when `HOLY_CODE_DISABLE_BACKGROUND_TASKS=true` |
 | `dangerouslyDisableSandbox` | `boolean` | No | Override sandbox mode |
 | `_simulatedSedEdit` | internal | — | Never in model-facing schema; used for sed edit simulation |
 
@@ -644,7 +644,7 @@ Windows-native PowerShell execution tool, mirroring BashTool's interface.
 | `command` | `string` | Yes | PowerShell command to execute |
 | `timeout` | `number` | No | Optional timeout in milliseconds (`max getMaxTimeoutMs()`) |
 | `description` | `string` | No | Description of what the command does |
-| `run_in_background` | `boolean` | No | Background execution; omitted when `CLAUDE_CODE_DISABLE_BACKGROUND_TASKS=true` |
+| `run_in_background` | `boolean` | No | Background execution; omitted when `HOLY_CODE_DISABLE_BACKGROUND_TASKS=true` |
 | `dangerouslyDisableSandbox` | `boolean` | No | Override sandbox mode |
 
 **Output Schema:**
@@ -851,7 +851,7 @@ Asynchronous launch:
 ```
 
 **Behavior:**
-- Creates team file at `~/.claude/teams/<team_name>.json`
+- Creates team file at `~/.holy/teams/<team_name>.json`
 - Resets task list to team-scoped task list
 - Registers team for session cleanup (auto-cleanup on exit)
 - One team per leader enforced: calling again while a team exists returns an error
@@ -910,7 +910,7 @@ type StructuredMessage =
 
 **Routing:**
 - **In-process agents:** Queues message in agent's inbox or resumes paused agent
-- **Mailbox (teammates):** Writes to `~/.claude/mailboxes/<name>.json`
+- **Mailbox (teammates):** Writes to `~/.holy/mailboxes/<name>.json`
 - **UDS socket:** Sends via Unix domain socket (for local inter-process)
 - **Bridge (cross-machine):** Routes via Remote Control API; requires user safety check (not auto-approvable)
 
@@ -1570,7 +1570,7 @@ These tools are gated by `isKairosCronEnabled()` (requires `feature('KAIROS')` +
 | `cron` | `string` | Yes | Standard 5-field cron expression in local time: `"M H DoM Mon DoW"` |
 | `prompt` | `string` | Yes | Prompt to enqueue at each fire time |
 | `recurring` | `boolean` | No (default `true`) | `true` = fire on every cron match (auto-expires after `DEFAULT_MAX_AGE_DAYS` days); `false` = fire once then auto-delete |
-| `durable` | `boolean` | No (default `false`) | `true` = persist to `.claude/scheduled_tasks.json` and survive restarts; `false` = in-memory only, dies when session ends |
+| `durable` | `boolean` | No (default `false`) | `true` = persist to `.holy/scheduled_tasks.json` and survive restarts; `false` = in-memory only, dies when session ends |
 
 **Output Schema:**
 
@@ -1835,7 +1835,7 @@ type Output
 
 **Implementation:**
 - Calls `${BASE_API_URL}/v1/code/triggers` REST API
-- Uses OAuth token (`checkAndRefreshOAuthTokenIfNeeded()` + `getClaudeAIOAuthTokens()`)
+- Uses OAuth token (`checkAndRefreshOAuthTokenIfNeeded()` + `getHolyAIOAuthTokens()`)
 - Requires org UUID (`getOrganizationUUID()`)
 - API beta header: `ccr-triggers-2026-01-30`
 - Timeout: `20_000ms`
@@ -1914,7 +1914,7 @@ type Progress  // Re-export of SkillToolProgress
 const REPL_TOOL_NAME = 'REPL'
 
 function isReplModeEnabled(): boolean
-// true when: CLAUDE_CODE_REPL not falsy AND (CLAUDE_REPL_MODE=1 OR (USER_TYPE='ant' AND CLAUDE_CODE_ENTRYPOINT='cli'))
+// true when: HOLY_CODE_REPL not falsy AND (CLAUDE_REPL_MODE=1 OR (USER_TYPE='ant' AND HOLY_CODE_ENTRYPOINT='cli'))
 // SDK entrypoints default to REPL mode OFF
 
 const REPL_ONLY_TOOLS = new Set([

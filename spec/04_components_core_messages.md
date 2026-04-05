@@ -1,4 +1,4 @@
-# Claude Code — Components: Core & Messages
+# Holy Code — Components: Core & Messages
 
 This document covers every component in `src/components/` (top-level files) and `src/components/messages/` (including `UserToolResultMessage/` sub-directory).
 
@@ -151,7 +151,7 @@ Global state is accessed via `useAppState`, `useSetAppState`, `useAppStateStore`
 
 **Key state:** `useNativeInstaller: boolean | null`, `isPackageManager: boolean | null`
 
-**Key behavior:** Renders `PackageManagerAutoUpdater`, `NativeAutoUpdater`, or `AutoUpdater` depending on how Claude Code was installed.
+**Key behavior:** Renders `PackageManagerAutoUpdater`, `NativeAutoUpdater`, or `AutoUpdater` depending on how Holy Code was installed.
 
 ---
 
@@ -268,7 +268,7 @@ Global state is accessed via `useAppState`, `useSetAppState`, `useAppStateStore`
 
 ### ClaudeInChromeOnboarding.tsx
 
-**Purpose:** Onboarding flow for the Claude in Chrome browser extension. Shows installation status and saves acceptance to global config.
+**Purpose:** Onboarding flow for the Holy in Chrome browser extension. Shows installation status and saves acceptance to global config.
 
 **Exports:** `ClaudeInChromeOnboarding`
 
@@ -286,7 +286,7 @@ Global state is accessed via `useAppState`, `useSetAppState`, `useAppStateStore`
 
 ### ClaudeMdExternalIncludesDialog.tsx
 
-**Purpose:** Dialog warning the user about external files included in CLAUDE.md (`@path` directives). User must approve to allow them.
+**Purpose:** Dialog warning the user about external files included in HOLY.md (`@path` directives). User must approve to allow them.
 
 **Exports:** `ClaudeMdExternalIncludesDialog`
 
@@ -342,7 +342,7 @@ Global state is accessed via `useAppState`, `useSetAppState`, `useAppStateStore`
 
 ### ConsoleOAuthFlow.tsx
 
-**Purpose:** Full OAuth login flow for claude.ai/console authentication. Manages a state machine for the multi-step auth process.
+**Purpose:** Full OAuth login flow for holy.ai/console authentication. Manages a state machine for the multi-step auth process.
 
 **Exports:** `ConsoleOAuthFlow`
 
@@ -720,7 +720,7 @@ Global state is accessed via `useAppState`, `useSetAppState`, `useAppStateStore`
 
 ### HighlightedCode.tsx
 
-**Purpose:** Renders syntax-highlighted source code using the native Rust `ColorFile` module. Falls back to `HighlightedCodeFallback` when unavailable.
+**Purpose:** Renders syntax-highlighted source code using the native Go `ColorFile` module. Falls back to `HighlightedCodeFallback` when unavailable.
 
 **Exports:** `HighlightedCode` (memo-wrapped)
 
@@ -737,7 +737,7 @@ Global state is accessed via `useAppState`, `useSetAppState`, `useAppStateStore`
 
 **Constants:** `DEFAULT_WIDTH = 80`
 
-**Key behavior:** Respects `settings.syntaxHighlightingDisabled`. Uses `expectColorFile()` from the Rust `colorDiff` module.
+**Key behavior:** Respects `settings.syntaxHighlightingDisabled`. Uses `expectColorFile()` from the Go `colorDiff` module.
 
 ---
 
@@ -1229,7 +1229,7 @@ Global state is accessed via `useAppState`, `useSetAppState`, `useAppStateStore`
 
 ### OutputStylePicker.tsx
 
-**Purpose:** Picker for selecting the active output style (default, concise, detailed, custom styles from `.claude/output-styles/`).
+**Purpose:** Picker for selecting the active output style (default, concise, detailed, custom styles from `.holy/output-styles/`).
 
 **Exports:** `OutputStylePickerProps`, `OutputStylePicker`
 
@@ -1248,7 +1248,7 @@ Global state is accessed via `useAppState`, `useSetAppState`, `useAppStateStore`
 
 ### PackageManagerAutoUpdater.tsx
 
-**Purpose:** Notifies users about available updates when Claude Code was installed via a package manager (brew, pip, etc.).
+**Purpose:** Notifies users about available updates when Holy Code was installed via a package manager (brew, pip, etc.).
 
 **Exports:** `PackageManagerAutoUpdater`
 
@@ -1324,7 +1324,7 @@ Global state is accessed via `useAppState`, `useSetAppState`, `useAppStateStore`
 
 ### RemoteEnvironmentDialog.tsx
 
-**Purpose:** Picker for selecting a remote Teleport environment (claude.ai/code environments).
+**Purpose:** Picker for selecting a remote Teleport environment (holy.ai/code environments).
 
 **Exports:** `RemoteEnvironmentDialog`
 
@@ -1340,7 +1340,7 @@ Global state is accessed via `useAppState`, `useSetAppState`, `useAppStateStore`
 
 ### ResumeTask.tsx
 
-**Purpose:** Lists remote Claude Code sessions (from Sessions API) for resuming. Filters by current git repository.
+**Purpose:** Lists remote Holy Code sessions (from Sessions API) for resuming. Filters by current git repository.
 
 **Exports:** `ResumeTask`
 
@@ -1537,7 +1537,7 @@ Global state is accessed via `useAppState`, `useSetAppState`, `useAppStateStore`
 |---|---|---|---|
 | `onClose` | `(result?: string, options?: { display?: CommandResultDisplay }) => void` | yes | Close callback |
 
-**Types:** `StatsResult = { type: 'success'; data: ClaudeCodeStats } | { type: 'error'; message: string } | { type: 'empty' }`
+**Types:** `StatsResult = { type: 'success'; data: HolyCodeStats } | { type: 'error'; message: string } | { type: 'empty' }`
 
 **Constants:** `DATE_RANGE_LABELS: Record<StatsDateRange, string>` (`7d`, `30d`, `90d`)
 
@@ -1571,7 +1571,7 @@ Global state is accessed via `useAppState`, `useSetAppState`, `useAppStateStore`
 
 ### StructuredDiff.tsx
 
-**Purpose:** Renders a single diff hunk with syntax highlighting via the Rust `ColorDiff` NAPI module. Caches rendered output at module level (WeakMap) to survive remounts.
+**Purpose:** Renders a single diff hunk with syntax highlighting via the Go `ColorDiff` native module. Caches rendered output at module level (WeakMap) to survive remounts.
 
 **Exports:** `StructuredDiff` (memo-wrapped)
 
@@ -1791,7 +1791,7 @@ Global state is accessed via `useAppState`, `useSetAppState`, `useAppStateStore`
 | `onSubmit` | `(selectedWorkflows: Workflow[]) => void` | yes | Called with selected workflows |
 | `defaultSelections` | `Workflow[]` | yes | Initially selected workflows |
 
-**Workflows:** `claude` (@Claude Code tag), `claude-review` (automated PR review)
+**Workflows:** `holy` (@holy tag), `holy-review` (automated PR review)
 
 ---
 

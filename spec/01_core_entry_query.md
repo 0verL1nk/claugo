@@ -1,4 +1,4 @@
-# Claude Code — Core Entry Points & Query System
+# Holy Code — Core Entry Points & Query System
 
 ## Table of Contents
 
@@ -32,7 +32,7 @@
 
 ### Purpose
 
-The very first module executed when a user runs `claude`. Acts as a lightweight bootstrap dispatcher that checks process arguments for known fast-paths **before** loading any heavy modules. Each fast-path dynamically imports only what it needs. The full CLI (`main.tsx`) is only loaded when no fast-path matches.
+The very first module executed when a user runs `holy`. Acts as a lightweight bootstrap dispatcher that checks process arguments for known fast-paths **before** loading any heavy modules. Each fast-path dynamically imports only what it needs. The full CLI (`main.tsx`) is only loaded when no fast-path matches.
 
 ### Key Flow
 
@@ -40,7 +40,7 @@ The very first module executed when a user runs `claude`. Acts as a lightweight 
 process.argv parsing
   ├── --version / -v → print MACRO.VERSION, exit (zero imports)
   ├── --dump-system-prompt → dump rendered system prompt (ant-only, DUMP_SYSTEM_PROMPT feature)
-  ├── --claude-in-chrome-mcp → runClaudeInChromeMcpServer()
+  ├── --holy-in-chrome-mcp → runClaudeInChromeMcpServer()
   ├── --chrome-native-host → runChromeNativeHost()
   ├── --computer-use-mcp → runComputerUseMcpServer() (CHICAGO_MCP feature)
   ├── --daemon-worker=<kind> → runDaemonWorker() (DAEMON feature)
@@ -60,7 +60,7 @@ process.argv parsing
 |---|---|
 | `process.env.COREPACK_ENABLE_AUTO_PIN = '0'` | Prevent yarnpkg from being added to package.json |
 | `process.env.NODE_OPTIONS += '--max-old-space-size=8192'` | CCR environment (16GB containers) heap size |
-| `ABLATION_BASELINE` flag | Sets multiple `CLAUDE_CODE_*` env vars for harness-science L0 ablation |
+| `ABLATION_BASELINE` flag | Sets multiple `HOLY_CODE_*` env vars for harness-science L0 ablation |
 
 ### Exports
 
@@ -113,8 +113,8 @@ The primary entry point for the full CLI. Responsibilities in order:
 4. **Early arg processing**:
    - `cc://` / `cc+unix://` URL rewriting (DIRECT_CONNECT feature)
    - `--handle-uri` deep link handling (LODESTONE feature)
-   - `claude assistant [sessionId]` rewriting (KAIROS feature)
-   - `claude ssh <host>` rewriting (SSH_REMOTE feature)
+   - `holy assistant [sessionId]` rewriting (KAIROS feature)
+   - `holy ssh <host>` rewriting (SSH_REMOTE feature)
 5. **Settings flag parsing**: `eagerLoadSettings()` runs before `init()`
 6. **Commander.js setup**: Defines the complete command tree (see CLI flags below)
 7. **`init()`** call: Validates configs, sets up network, telemetry loading promise
@@ -127,7 +127,7 @@ The primary entry point for the full CLI. Responsibilities in order:
 #### `startDeferredPrefetches()`
 
 Called after first REPL render to avoid blocking the initial paint. Skipped when:
-- `CLAUDE_CODE_EXIT_AFTER_FIRST_RENDER=1`
+- `HOLY_CODE_EXIT_AFTER_FIRST_RENDER=1`
 - `--bare` mode (isBareMode())
 
 Prefetches (fire-and-forget):
@@ -161,7 +161,7 @@ Prefetches (fire-and-forget):
 | `--verbose` | `boolean` | Verbose output |
 | `--debug` | `boolean` | Debug mode |
 | `--mcp-config <file>` | `string` | MCP config file path |
-| `--add-dir <dir>` | `string[]` | Additional directories for CLAUDE.md |
+| `--add-dir <dir>` | `string[]` | Additional directories for HOLY.md |
 | `--resume [sessionId]` | `string?` | Resume previous session |
 | `--bare` | `boolean` | Simple/stripped mode (no UI extras) |
 | `--settings <path|json>` | `string` | Flag-layer settings override |
@@ -325,7 +325,7 @@ Runs once. Sequence:
 12. `configureGlobalMTLS()`
 13. `configureGlobalAgents()` (proxy)
 14. `preconnectAnthropicApi()` — overlap TCP+TLS with action handler work
-15. Upstream proxy initialization (CLAUDE_CODE_REMOTE only)
+15. Upstream proxy initialization (HOLY_CODE_REMOTE only)
 16. `setShellIfWindows()` — configure git-bash on Windows
 17. `registerCleanup(shutdownLspServerManager)`
 18. `registerCleanup(cleanupSessionTeams)` (lazy import)
@@ -366,7 +366,7 @@ Internal: `doInitializeTelemetry()` → `setMeterState()` → `initializeTelemet
 
 ### Purpose
 
-Starts Claude Code as an MCP (Model Context Protocol) server, exposing Claude's built-in tools over the `stdio` transport. Server name: `claude/tengu`.
+Starts Holy Code as an MCP (Model Context Protocol) server, exposing Claude's built-in tools over the `stdio` transport. Server name: `holy/tengu`.
 
 ### Exports
 
@@ -409,7 +409,7 @@ For each tool:
 | Constant | Value |
 |---|---|
 | `READ_FILE_STATE_CACHE_SIZE` | `100` |
-| MCP server name | `'claude/tengu'` |
+| MCP server name | `'holy/tengu'` |
 | MCP server version | `MACRO.VERSION` |
 
 ---
@@ -418,7 +418,7 @@ For each tool:
 
 ### Purpose
 
-The main entrypoint for Claude Code Agent SDK types. Re-exports all public SDK types and declares stub functions that throw `'not implemented'` — actual implementations are provided by the real SDK runtime (the CLI process). This file is the type-only interface for SDK consumers.
+The main entrypoint for Holy Code Agent SDK types. Re-exports all public SDK types and declares stub functions that throw `'not implemented'` — actual implementations are provided by the real SDK runtime (the CLI process). This file is the type-only interface for SDK consumers.
 
 ### Exports
 
@@ -613,7 +613,7 @@ export const McpSSEServerConfigSchema     // { type: 'sse', url, headers? }
 export const McpHttpServerConfigSchema    // { type: 'http', url, headers? }
 export const McpSdkServerConfigSchema     // { type: 'sdk', name }
 export const McpServerConfigForProcessTransportSchema  // union of stdio|sse|http|sdk
-export const McpClaudeAIProxyServerConfigSchema  // { type: 'claudeai-proxy', url, id }
+export const McpHolyAIProxyServerConfigSchema  // { type: 'claudeai-proxy', url, id }
 export const McpServerStatusConfigSchema  // union of process transport + claudeai-proxy
 export const McpSetServersResultSchema    // { added, removed, errors }
 ```
@@ -1030,7 +1030,7 @@ private loadedNestedMemoryPaths: Set<string>  // grows across turns
 
 In `submitMessage()`, the user's messages are written to the transcript **before** entering the API query loop. Timing variants:
 - **`--bare` / `isBareMode()`**: Fire-and-forget (saves ~4ms on SSD)
-- **`CLAUDE_CODE_EAGER_FLUSH` or `CLAUDE_CODE_IS_COWORK`**: Awaited + flushed
+- **`HOLY_CODE_EAGER_FLUSH` or `HOLY_CODE_IS_COWORK`**: Awaited + flushed
 - **Default**: Awaited
 
 ### `ProcessUserInputContext` Internals
@@ -1057,9 +1057,9 @@ export type QueryConfig = {
   sessionId: SessionId
   gates: {
     streamingToolExecution: boolean  // Statsig: 'tengu_streaming_tool_execution2'
-    emitToolUseSummaries: boolean    // env: CLAUDE_CODE_EMIT_TOOL_USE_SUMMARIES
+    emitToolUseSummaries: boolean    // env: HOLY_CODE_EMIT_TOOL_USE_SUMMARIES
     isAnt: boolean                   // env: USER_TYPE === 'ant'
-    fastModeEnabled: boolean         // env: !CLAUDE_CODE_DISABLE_FAST_MODE
+    fastModeEnabled: boolean         // env: !HOLY_CODE_DISABLE_FAST_MODE
   }
 }
 
@@ -1071,9 +1071,9 @@ export function buildQueryConfig(): QueryConfig
 | Gate | Source | Key |
 |---|---|---|
 | `streamingToolExecution` | Statsig (cached, may be stale) | `tengu_streaming_tool_execution2` |
-| `emitToolUseSummaries` | Environment variable | `CLAUDE_CODE_EMIT_TOOL_USE_SUMMARIES` |
+| `emitToolUseSummaries` | Environment variable | `HOLY_CODE_EMIT_TOOL_USE_SUMMARIES` |
 | `isAnt` | Environment variable | `USER_TYPE === 'ant'` |
-| `fastModeEnabled` | Environment variable | `!CLAUDE_CODE_DISABLE_FAST_MODE` |
+| `fastModeEnabled` | Environment variable | `!HOLY_CODE_DISABLE_FAST_MODE` |
 
 ---
 
@@ -1141,7 +1141,7 @@ type StopHookResult = {
 1. **`saveCacheSafeParams()`** — snapshot context for prompt suggestion / btw queries (main thread and SDK only)
 2. **Template job classification** (TEMPLATES feature, main thread only, non-subagent): `classifyAndWriteState()` — max 60s timeout
 3. **Background side-effects** (non-bare mode):
-   - `executePromptSuggestion()` (fire-and-forget, unless `CLAUDE_CODE_ENABLE_PROMPT_SUGGESTION=false`)
+   - `executePromptSuggestion()` (fire-and-forget, unless `HOLY_CODE_ENABLE_PROMPT_SUGGESTION=false`)
    - `executeExtractMemories()` (EXTRACT_MEMORIES feature, main thread only)
    - `executeAutoDream()` (non-subagent)
 4. **Computer-use cleanup** (CHICAGO_MCP feature, main thread only): `cleanupComputerUseAfterTurn()`
@@ -1235,7 +1235,7 @@ checkTokenBudget(tracker, agentId, budget, globalTurnTokens):
 
 ### Purpose
 
-Provides memoized context functions that build the `systemContext` and `userContext` dictionaries prepended to each conversation. Both are cached for the duration of the conversation. Includes the git status, CLAUDE.md content, and current date.
+Provides memoized context functions that build the `systemContext` and `userContext` dictionaries prepended to each conversation. Both are cached for the duration of the conversation. Includes the git status, HOLY.md content, and current date.
 
 ### Exports
 
@@ -1289,20 +1289,20 @@ Recent commits:
 ```
 
 Skips git status when:
-- `CLAUDE_CODE_REMOTE=true` (CCR environment)
+- `HOLY_CODE_REMOTE=true` (CCR environment)
 - `shouldIncludeGitInstructions()` returns false
 
 ### `getUserContext()` — Memoized
 
 ```typescript
 {
-  claudeMd?: string,    // Combined CLAUDE.md content
+  claudeMd?: string,    // Combined HOLY.md content
   currentDate: string,  // "Today's date is YYYY-MM-DD."
 }
 ```
 
-CLAUDE.md loading is disabled when:
-- `CLAUDE_CODE_DISABLE_CLAUDE_MDS=true`
+HOLY.md loading is disabled when:
+- `HOLY_CODE_DISABLE_CLAUDE_MDS=true`
 - `isBareMode()` AND no `--add-dir` directories
 
 Side effect: calls `setCachedClaudeMdContent()` to cache content for auto-mode classifier.
@@ -1317,7 +1317,7 @@ When injection changes, clears both `getUserContext.cache` and `getSystemContext
 
 ### Purpose
 
-Manages the persistent prompt history (up-arrow navigation and Ctrl+R fuzzy search). History is stored as JSONL in `~/.claude/history.jsonl`. Handles pasted content with both inline (≤ 1024 bytes) and external hash-based storage. Entries are scoped to project root.
+Manages the persistent prompt history (up-arrow navigation and Ctrl+R fuzzy search). History is stored as JSONL in `~/.holy/history.jsonl`. Handles pasted content with both inline (≤ 1024 bytes) and external hash-based storage. Entries are scoped to project root.
 
 ### Exports
 
@@ -1385,7 +1385,7 @@ type StoredPastedContent = {
 
 ### `addToHistory()` Behavior
 
-1. Skips if `CLAUDE_CODE_SKIP_PROMPT_HISTORY=true` (tmux subprocess sessions)
+1. Skips if `HOLY_CODE_SKIP_PROMPT_HISTORY=true` (tmux subprocess sessions)
 2. Registers cleanup hook on first call (flushes pending entries on process exit)
 3. Calls `addToPromptHistory()` async (fire-and-forget)
 
@@ -1549,7 +1549,7 @@ export function incrementProjectOnboardingSeenCount(): void
 | Key | Condition to enable | Completion check |
 |---|---|---|
 | `'workspace'` | `isDirEmpty(getCwd())` | Never auto-completes (user must act) |
-| `'claudemd'` | `!isDirEmpty(getCwd())` | `existsSync(join(getCwd(), 'CLAUDE.md'))` |
+| `'claudemd'` | `!isDirEmpty(getCwd())` | `existsSync(join(getCwd(), 'HOLY.md'))` |
 
 ### `shouldShowProjectOnboarding()` — Memoized
 
@@ -1569,7 +1569,7 @@ Short-circuits on `hasCompletedProjectOnboarding: true` in cached config (avoids
 
 ### Purpose
 
-The single module-level state singleton for a Claude Code process. **DO NOT ADD MORE STATE HERE** (documented with triple comment emphasis). Contains all session-scoped values including costs, tokens, model configuration, telemetry, agent state, and session identity.
+The single module-level state singleton for a Holy Code process. **DO NOT ADD MORE STATE HERE** (documented with triple comment emphasis). Contains all session-scoped values including costs, tokens, model configuration, telemetry, agent state, and session identity.
 
 ### State Structure
 

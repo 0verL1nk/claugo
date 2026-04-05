@@ -1,4 +1,4 @@
-# Claude Code — Utilities
+# Holy Code — Utilities
 
 This document covers the entire `src/utils/` directory (564 files across 36 subdirectories) plus `src/interactiveHelpers.tsx` and `src/ink.ts`.
 
@@ -23,7 +23,7 @@ This document covers the entire `src/utils/` directory (564 files across 36 subd
 17. [Analytics & Telemetry](#17-analytics--telemetry)
 18. [Background & Cron Systems](#18-background--cron-systems)
 19. [Computer Use](#19-computer-use)
-20. [Claude-in-Chrome](#20-claude-in-chrome)
+20. [Claude-in-Chrome](#20-holy-in-chrome)
 21. [Deep Link System](#21-deep-link-system)
 22. [Plugin Utilities](#22-plugin-utilities)
 23. [Swarm Backends](#23-swarm-backends)
@@ -160,7 +160,7 @@ export type ExecOptions = {
 }
 
 export async function findSuitableShell(): Promise<string>
-// Priority: CLAUDE_CODE_SHELL env > $SHELL > zsh > bash
+// Priority: HOLY_CODE_SHELL env > $SHELL > zsh > bash
 
 export const getShellConfig: typeof getShellConfigImpl  // memoized
 export const getPsProvider: () => Promise<ShellProvider>  // memoized
@@ -482,7 +482,7 @@ Main authentication orchestration. Handles API key, OAuth, and AWS auth.
 **Key Exports:**
 ```typescript
 export function getSubscriptionType(): SubscriptionType | null
-export function isClaudeAISubscriber(): boolean
+export function isHolyAISubscriber(): boolean
 export function isProSubscriber(): boolean
 export function isMaxSubscriber(): boolean
 export function isTeamPremiumSubscriber(): boolean
@@ -814,7 +814,7 @@ export function isIgnoredByGitignore(path: string, cwd: string): boolean
 Git diff parsing and formatting utilities.
 
 ### `gitSettings.ts`
-Git configuration utilities for Claude Code settings.
+Git configuration utilities for Holy Code settings.
 
 ### `ghPrStatus.ts`
 GitHub PR status checking via `gh` CLI.
@@ -841,7 +841,7 @@ Git worktree management utilities.
 Feature flag check for worktree mode.
 
 ### `commitAttribution.ts`
-Adds Claude Code attribution to git commits.
+Adds Holy Code attribution to git commits.
 
 ---
 
@@ -910,7 +910,7 @@ Search within session transcripts.
 Handles resuming sessions across different project directories.
 
 ### `concurrentSessions.ts`
-Manages multiple concurrent Claude Code sessions.
+Manages multiple concurrent Holy Code sessions.
 
 ### `cwd.ts`
 ```typescript
@@ -1519,11 +1519,11 @@ React rendering for Chrome-specific tool results.
 ### `deepLink/parseDeepLink.ts`
 ```typescript
 export function parseDeepLink(url: string): DeepLinkAction | null
-// Parses claude://... URLs
+// Parses holy://... URLs
 ```
 
 ### `deepLink/protocolHandler.ts`
-Registers and handles the `claude://` protocol.
+Registers and handles the `holy://` protocol.
 
 ### `deepLink/registerProtocol.ts`
 Registers the deep link protocol with the OS.
@@ -1623,7 +1623,7 @@ export async function teleportToRemote(
   options: TeleportOptions,
   root: Root
 ): Promise<TeleportResult>
-// Launches a remote Claude Code session via CCR
+// Launches a remote Holy Code session via CCR
 ```
 
 ---
@@ -1644,7 +1644,7 @@ export type MemoryFile = {
 Detects and loads relevant memory files for the current context.
 
 ### `claudemd.ts`
-CLAUDE.md file management (reading, writing, external includes).
+HOLY.md file management (reading, writing, external includes).
 
 ```typescript
 export function getMemoryFiles(cwd?: string): MemoryFile[]
@@ -1653,7 +1653,7 @@ export function shouldShowClaudeMdExternalIncludesWarning(): boolean
 ```
 
 ### `markdownConfigLoader.ts`
-Loads configuration from CLAUDE.md-style markdown files.
+Loads configuration from HOLY.md-style markdown files.
 
 ---
 
@@ -1715,7 +1715,7 @@ Type-safe tagged ID types (prevents mixing SessionId, AgentId, etc.).
 Native binary installation utilities.
 
 ### `localInstaller.ts`
-Installs Claude Code to local paths.
+Installs Holy Code to local paths.
 
 ### `autoUpdater.ts`
 Auto-update checking and installation.
@@ -1948,7 +1948,7 @@ export async function exitWithMessage(
 - `bootstrap/state` — global state management
 - `services/analytics/growthbook` — feature flags
 - `state/AppState` — application state
-- `utils/claudemd` — CLAUDE.md reading
+- `utils/claudemd` — HOLY.md reading
 - `utils/config` — global/project config
 - `utils/settings/settings` — user settings
 - `services/mcpServerApproval` — MCP approval flow
@@ -1958,7 +1958,7 @@ export async function exitWithMessage(
 
 ## 33. `ink.ts` (Top-Level Module)
 
-The public API for the Ink terminal rendering framework used throughout Claude Code.
+The public API for the Ink terminal rendering framework used throughout Holy Code.
 
 **Purpose:** Wraps the internal `ink/root.ts` with a `ThemeProvider` so every render is automatically themed.
 
@@ -2028,7 +2028,7 @@ Key behaviors:
 - **Pipe rearrangement**: When a command contains `|` and needs stdin redirect, calls `rearrangePipeCommand()` to apply redirect to first pipe segment only.
 - **Tmux isolation**: Lazily initializes Claude's isolated tmux socket when `hasTmuxToolBeenUsed()` or the command contains `tmux`.
 - **Windows compatibility**: Rewrites `2>nul` to `/dev/null` and converts paths via `windowsPathToPosixPath`.
-- **`CLAUDE_CODE_SHELL_PREFIX`**: Wraps the assembled command string in a custom prefix for shell environment wrappers.
+- **`HOLY_CODE_SHELL_PREFIX`**: Wraps the assembled command string in a custom prefix for shell environment wrappers.
 
 ### `shell/powershellProvider.ts`
 Factory: `createPowerShellProvider(shellPath): ShellProvider`

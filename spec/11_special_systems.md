@@ -1,4 +1,4 @@
-# Claude Code — Special Systems: Buddy, Memory, Keybindings, Skills, Voice, Plugins & More
+# Holy Code — Special Systems: Buddy, Memory, Keybindings, Skills, Voice, Plugins & More
 
 ---
 
@@ -324,7 +324,7 @@ const PET_HEARTS = [
 
 The memory system provides Claude with persistent, file-based memory across sessions. Memory is stored as markdown files with YAML frontmatter in a per-project directory. It encompasses:
 
-1. **Auto memory** (`~/.claude/projects/<sanitized-git-root>/memory/`) — per-user, per-project
+1. **Auto memory** (`~/.holy/projects/<sanitized-git-root>/memory/`) — per-user, per-project
 2. **Team memory** (`<auto-mem-path>/team/`) — shared across contributors (feature-gated)
 3. **Memory scanning** — reads frontmatter headers to build a manifest without loading full content
 4. **Relevance selection** — uses a Sonnet model call to pick the most relevant files (up to 5) for a given query
@@ -337,7 +337,7 @@ The memory system provides Claude with persistent, file-based memory across sess
 ### 2.2 Memory Directory Structure
 
 ```
-~/.claude/
+~/.holy/
   projects/
     <sanitized-git-root>/
       memory/
@@ -369,7 +369,7 @@ All memory falls into four types (stored in frontmatter `type:` field):
 - Code patterns, architecture, file structure (derivable by reading code)
 - Git history, recent changes (use `git log`)
 - Debugging solutions/fix recipes (the fix is in the code)
-- Anything in CLAUDE.md
+- Anything in HOLY.md
 - Ephemeral task details, in-progress work
 
 ---
@@ -452,7 +452,7 @@ Formats headers as text manifest for the selector prompt:
 
 **System prompt used for selection:**
 ```
-You are selecting memories that will be useful to Claude Code as it processes a user's query.
+You are selecting memories that will be useful to Holy Code as it processes a user's query.
 Return a list of filenames for the memories that will clearly be useful (up to 5).
 Only include memories you are certain will be helpful. Be selective and discerning.
 - If unsure, do not include it.
@@ -508,9 +508,9 @@ Verify against current code before asserting as fact.
 ### 2.9 Memory Path Resolution (`paths.ts`)
 
 **`isAutoMemoryEnabled()`** — Priority chain:
-1. `CLAUDE_CODE_DISABLE_AUTO_MEMORY` env var (truthy → OFF, falsy-defined → ON)
-2. `CLAUDE_CODE_SIMPLE` (--bare mode) → OFF
-3. `CLAUDE_CODE_REMOTE` without `CLAUDE_CODE_REMOTE_MEMORY_DIR` → OFF
+1. `HOLY_CODE_DISABLE_AUTO_MEMORY` env var (truthy → OFF, falsy-defined → ON)
+2. `HOLY_CODE_SIMPLE` (--bare mode) → OFF
+3. `HOLY_CODE_REMOTE` without `HOLY_CODE_REMOTE_MEMORY_DIR` → OFF
 4. `settings.autoMemoryEnabled` (project-level opt-out)
 5. Default: **enabled**
 
@@ -518,7 +518,7 @@ Verify against current code before asserting as fact.
 1. `CLAUDE_COWORK_MEMORY_PATH_OVERRIDE` env var (Cowork spaces)
 2. `autoMemoryDirectory` in settings (policy > flag > local > user sources; supports `~/` expansion)
 3. `<memoryBase>/projects/<sanitized-git-root>/memory/`
-   - `memoryBase` = `CLAUDE_CODE_REMOTE_MEMORY_DIR` or `~/.claude`
+   - `memoryBase` = `HOLY_CODE_REMOTE_MEMORY_DIR` or `~/.holy`
 
 **Security validations in `validateMemoryPath()`:**
 - Rejects relative paths (not `isAbsolute`)
@@ -538,7 +538,7 @@ Verify against current code before asserting as fact.
 |--------|-------------|
 | `isAutoMemoryEnabled()` | Check if auto-memory is on |
 | `isExtractModeActive()` | Whether background memory extraction agent will run |
-| `getMemoryBaseDir()` | Base dir: env override or `~/.claude` |
+| `getMemoryBaseDir()` | Base dir: env override or `~/.holy` |
 | `getAutoMemPath()` | Full memory directory path (memoized) |
 | `getAutoMemDailyLogPath(date?)` | Daily log path for KAIROS mode |
 | `getAutoMemEntrypoint()` | `MEMORY.md` path inside auto-mem dir |
@@ -640,7 +640,7 @@ All exports used in system prompt construction:
 
 ### 3.1 System Overview
 
-The keybindings system provides a fully configurable keyboard shortcut layer for Claude Code. Users can customize bindings via `~/.claude/keybindings.json` (gated on `tengu_keybinding_customization_release` GrowthBook feature). The system supports:
+The keybindings system provides a fully configurable keyboard shortcut layer for Holy Code. Users can customize bindings via `~/.holy/keybindings.json` (gated on `tengu_keybinding_customization_release` GrowthBook feature). The system supports:
 - Single-keystroke bindings
 - Multi-keystroke chords (e.g., `ctrl+x ctrl+k`)
 - Context-scoped bindings (Chat, Global, Confirmation, etc.)
@@ -896,8 +896,8 @@ Zod v4 schemas for `keybindings.json` validation:
 **`KeybindingsSchema`** — Wraps with optional `$schema` and `$docs` metadata:
 ```json
 {
-  "$schema": "https://www.schemastore.org/claude-code-keybindings.json",
-  "$docs": "https://code.claude.com/docs/en/keybindings",
+  "$schema": "https://www.schemastore.org/holy-code-keybindings.json",
+  "$docs": "https://code.holy.com/docs/en/keybindings",
   "bindings": [...]
 }
 ```
@@ -948,13 +948,13 @@ type KeybindingWarning = {
 **`MACOS_RESERVED`** (macOS only, all errors):
 - `cmd+c/v/x/q/w/tab/space`
 
-Note: `ctrl+s` (XOFF) and `ctrl+q` (XON) are intentionally NOT in reserved list — modern terminals disable flow control and Claude Code uses `ctrl+s` for stash.
+Note: `ctrl+s` (XOFF) and `ctrl+q` (XON) are intentionally NOT in reserved list — modern terminals disable flow control and Holy Code uses `ctrl+s` for stash.
 
 ---
 
 ### 3.12 User Bindings Loader (`loadUserBindings.ts`)
 
-**File location:** `~/.claude/keybindings.json`
+**File location:** `~/.holy/keybindings.json`
 
 **`isKeybindingCustomizationEnabled()`** — GrowthBook gate: `tengu_keybinding_customization_release`.
 
@@ -970,7 +970,7 @@ Note: `ctrl+s` (XOFF) and `ctrl+q` (XON) are intentionally NOT in reserved list 
 | Export | Description |
 |--------|-------------|
 | `isKeybindingCustomizationEnabled()` | GrowthBook gate check |
-| `getKeybindingsPath()` | `~/.claude/keybindings.json` |
+| `getKeybindingsPath()` | `~/.holy/keybindings.json` |
 | `loadKeybindings()` | Async load (used in watcher) |
 | `loadKeybindingsSync()` | Sync load (React useState initializer) |
 | `loadKeybindingsSyncWithWarnings()` | Sync with warnings |
@@ -1000,7 +1000,7 @@ Note: `ctrl+s` (XOFF) and `ctrl+q` (XON) are intentionally NOT in reserved list 
 
 Skills are Claude's slash commands that execute AI prompts or local logic. They come from multiple sources:
 - **Bundled skills** — compiled into the binary, available to all users
-- **Disk-based skills** — markdown files in `.claude/skills/` directories
+- **Disk-based skills** — markdown files in `.holy/skills/` directories
 - **Plugin skills** — provided by installed plugins
 - **MCP skills** — generated from MCP server tool definitions
 
@@ -1049,7 +1049,7 @@ type BundledSkillDefinition = {
 
 | Skill | Feature Gate | Description |
 |-------|-------------|-------------|
-| `updateConfig` | — | Update Claude Code configuration |
+| `updateConfig` | — | Update Holy Code configuration |
 | `keybindings` | — | Manage keyboard shortcuts |
 | `verify` | — | Verify work / run checks |
 | `debug` | — | Debug assistance |
@@ -1064,7 +1064,7 @@ type BundledSkillDefinition = {
 | `loop` | `AGENT_TRIGGERS` | Recurring agent triggers |
 | `scheduleRemoteAgents` | `AGENT_TRIGGERS_REMOTE` | Schedule remote agent runs |
 | `claudeApi` | `BUILDING_CLAUDE_APPS` | Claude API reference skill |
-| `claudeInChrome` | `shouldAutoEnableClaudeInChrome()` | Claude in Chrome integration |
+| `claudeInChrome` | `shouldAutoEnableClaudeInChrome()` | Holy in Chrome integration |
 | `runSkillGenerator` | `RUN_SKILL_GENERATOR` | Skill generation tool |
 
 ---
@@ -1098,8 +1098,8 @@ The loader handles:
 
 ### 5.1 System Overview
 
-Voice mode enables hold-to-talk interaction with Claude Code using a push-to-talk model. Voice requires:
-1. OAuth authentication (uses `voice_stream` endpoint on claude.ai)
+Voice mode enables hold-to-talk interaction with Holy Code using a push-to-talk model. Voice requires:
+1. OAuth authentication (uses `voice_stream` endpoint on holy.ai)
 2. GrowthBook feature flag `VOICE_MODE`
 3. Kill-switch gate: `tengu_amber_quartz_disabled` (negative flag)
 
@@ -1116,9 +1116,9 @@ Voice mode enables hold-to-talk interaction with Claude Code using a push-to-tal
 | `isVoiceModeEnabled()` | Full check: `hasVoiceAuth() && isVoiceGrowthBookEnabled()` |
 
 **Why OAuth required:**
-- Voice uses `voice_stream` endpoint on claude.ai
+- Voice uses `voice_stream` endpoint on holy.ai
 - Not available with API keys, Bedrock, Vertex, or Foundry
-- `isAnthropicAuthEnabled()` checks the provider, `getClaudeAIOAuthTokens()` verifies a token actually exists
+- `isAnthropicAuthEnabled()` checks the provider, `getHolyAIOAuthTokens()` verifies a token actually exists
 
 **Kill-switch design:**
 - Flag default is `false` = not killed
@@ -1135,7 +1135,7 @@ Voice mode enables hold-to-talk interaction with Claude Code using a push-to-tal
 
 ### 6.1 System Overview
 
-Plugins extend Claude Code with additional skills, hooks, MCP servers, LSP servers, and output styles. There are two plugin categories:
+Plugins extend Holy Code with additional skills, hooks, MCP servers, LSP servers, and output styles. There are two plugin categories:
 1. **Built-in plugins** — ship with the CLI, appear in `/plugin` UI, user-toggleable
 2. **Marketplace plugins** — installed from GitHub repos via `/plugin install`
 
@@ -1265,7 +1265,7 @@ type PluginLoadResult = {
 
 ### 7.1 System Overview
 
-Output styles are markdown files that define custom formatting instructions for Claude's responses. Loaded from `output-styles/` subdirectories in project `.claude/` and user `~/.claude/` directories.
+Output styles are markdown files that define custom formatting instructions for Claude's responses. Loaded from `output-styles/` subdirectories in project `.holy/` and user `~/.holy/` directories.
 
 **Source:** `src/outputStyles/loadOutputStylesDir.ts`
 
@@ -1273,7 +1273,7 @@ Output styles are markdown files that define custom formatting instructions for 
 
 ### 7.2 Configuration
 
-- **Location:** `.claude/output-styles/*.md` (project) and `~/.claude/output-styles/*.md` (user)
+- **Location:** `.holy/output-styles/*.md` (project) and `~/.holy/output-styles/*.md` (user)
 - **File naming:** `filename.md` → style name `filename`
 - **Frontmatter fields:**
   - `name`: Override the style name (defaults to filename without `.md`)
@@ -1407,7 +1407,7 @@ type HooksSettings = Partial<Record<HookEvent, HookMatcher[]>>
 
 ## 9. Native-TypeScript Ports (native-ts/)
 
-The `native-ts/` directory contains pure-TypeScript ports of Rust NAPI native modules. These are used when the native modules cannot be loaded (platforms without precompiled binaries, etc.).
+The `native-ts/` directory contains pure-TypeScript ports of Go-backed native modules. These are used when the native modules cannot be loaded (platforms without precompiled binaries, etc.).
 
 ### 9.1 Color Diff (`native-ts/color-diff/index.ts`)
 
@@ -1450,9 +1450,9 @@ type SyntaxTheme = { ... }
 
 ### 9.2 File Index (`native-ts/file-index/index.ts`)
 
-**Purpose:** Port of `vendor/file-index-src` — high-performance fuzzy file path search, replacing nucleo (Rust).
+**Purpose:** Port of `vendor/file-index-src` — high-performance fuzzy file path search, replacing the native Go matcher.
 
-**Algorithm:** Approximates fzf-v2/nucleo scoring with:
+**Algorithm:** Approximates fzf-v2/native matcher scoring with:
 - Bitmap reject: paths missing any needle letter rejected in O(1)
 - Greedy-earliest position scan via `indexOf` (SIMD-accelerated in JSC/V8)
 - Scoring constants:
@@ -1731,7 +1731,7 @@ See Section 6.4 for `LoadedPlugin`, `BuiltinPluginDefinition`, `PluginError`, an
 
 ### 13.1 System Overview
 
-The remote session system manages multi-user and remote-connected Claude Code sessions, bridging between the local CLI process and remote session infrastructure.
+The remote session system manages multi-user and remote-connected Holy Code sessions, bridging between the local CLI process and remote session infrastructure.
 
 **Source:** `src/remote/`
 
